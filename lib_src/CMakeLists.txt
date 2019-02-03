@@ -1,0 +1,10 @@
+
+set(CIPHER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNAL "cipher include dir")
+
+include_directories(${CIPHER_INCLUDE_DIR})
+set(CIPHER_LIB_SRC_FILES ${CIPHER_LIB_SRC_FILES} aes/aes.c)
+set(CIPHER_LIB_SRC_FILES ${CIPHER_LIB_SRC_FILES} des/des.c)
+set(CIPHER_LIB_SRC_FILES ${CIPHER_LIB_SRC_FILES} des/listeSimple.c)
+
+add_library(cipher SHARED ${CIPHER_LIB_SRC_FILES})
+

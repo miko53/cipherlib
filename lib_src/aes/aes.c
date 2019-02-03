@@ -161,9 +161,9 @@ int AEScryptage(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], u
   int Nk;
   int Nr;
   int nCurrentRound = 0; 
-  unsigned long dwTabKey[nMaxNb * (nMaxRound+1)] = {0};
-  unsigned char byTabKey[4][nMaxNb][nMaxRound+1] = {0};
-  unsigned char byTabBlock[4][nMaxNb] = {0};
+  unsigned long dwTabKey[nMaxNb * (nMaxRound+1)];// = {0};
+  unsigned char byTabKey[4][nMaxNb][nMaxRound+1];// = {0};
+  unsigned char byTabBlock[4][nMaxNb];// = {0};
 
   // Verification Longueur de block et longueur de la clef
   if ((nLongueurBlock == 128) || (nLongueurBlock == 192) || (nLongueurBlock == 256))
@@ -253,7 +253,7 @@ int AESDecryptage(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[]
   int Nk;
   int Nr;
   int nCurrentRound = 0; 
-  unsigned long dwTabKey[nMaxNb * (nMaxRound+1)] = {0};
+  unsigned long dwTabKey[nMaxNb * (nMaxRound+1)];// = {0};
   unsigned char byTabKey[4][nMaxNb][nMaxRound+1];
   unsigned char byTabBlock[4][nMaxNb];
 

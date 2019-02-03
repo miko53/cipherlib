@@ -634,7 +634,7 @@ int crypterFichier(char fichierSource[], char fichierDestination[], char* clefCr
 	{
 		printf("\t conversion on doing %3.2d %% \r", (fileSizeCrypter*100) / fileSize.typeLong);
 
-		if (signed long (fileSize.typeLong - fileSizeCrypter) >= 8)
+		if ((signed long) (fileSize.typeLong - fileSizeCrypter) >= 8)
 		{
 			for(i=0;i<8; i++)
 				aCrypter[i] = fgetc(pSource);

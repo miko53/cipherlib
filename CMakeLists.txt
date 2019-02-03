@@ -1,8 +1,8 @@
 project(cipherlib)
 cmake_minimum_required(VERSION 2.8.8)
 
-set(CIPHER_LIB_SRC_FILES aes/aes.cpp)
-set(CIPHER_LIB_SRC_FILES des/des.c)
-set(CIPHER_LIB_SRC_FILES des/listeSimple.c)
+set(CMAKE_C_FLAGS 
+    "${CMAKE_C_FLAGS} --std=gnu99 -W -Wall -Wextra -Wno-aggregate-return -Wno-suggest-attribute=format -Wno-undef -fms-extensions -Wno-pointer-sign")
 
-add_library(cipher SHARED ${CIPHER_LIB_SRC_FILES})
+add_subdirectory(lib_src)
+add_subdirectory(test)

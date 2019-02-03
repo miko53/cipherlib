@@ -5,13 +5,14 @@
 #include <string.h>
 #include "des.h"
 #include "listeSimple.h"
+#include "common.h"
 
 const char o_VERSION_LOGICIEL = 1;
 const char o_CHAR_COMMENT = ';';
 
 const int o_NB_CHAMPS = 5;
 
-const char o_CHAMPS_SCRIPT[o_NB_CHAMPS][15] =
+const char o_CHAMPS_SCRIPT[][100] =
 {
 	"[CryptageType]",	/* Marqueur no 0 */
 	"[Action]",			/* 1 */
@@ -61,12 +62,12 @@ int main(int argc, char *argv[], char *envp[])
 {
 	register int i;
 	FILE *pScriptFile;
-	char pBuffer[o_TAILLE_MAX_LIGNE] = {0};
+	char pBuffer[o_TAILLE_MAX_LIGNE];// = {0};
 	char* pFileName = NULL;
-	bool presenceMarqueur = false;
-	bool champRemplie = false;
-	bool ligneOk;
-	bool modificationMarqueur = false;
+	BOOL presenceMarqueur = FALSE;
+	BOOL champRemplie = FALSE;
+	BOOL ligneOk;
+	BOOL modificationMarqueur = FALSE;
 	int champActuel = -1;
 	stDecodageCommande commandeScript;
 
@@ -102,18 +103,18 @@ int main(int argc, char *argv[], char *envp[])
 		if (pBuffer[0] == o_CHAR_COMMENT)
 			continue;
 
-		ligneOk = false;
+		ligneOk = FALSE;
 
 		for(i = 0; i< (signed int) strlen(pBuffer); i++)
 		{
 			if ((pBuffer[i] != (char)0x20) && (pBuffer[i] != (char)0x0D))
-				ligneOk = true;
+				ligneOk = TRUE;
 		}
 
-		if (ligneOk == false)
+		if (ligneOk == FALSE)
 			continue;
 
-		if (presenceMarqueur == true)
+		if (presenceMarqueur == TRUE)
 		{
 			for(i=0;i<o_NB_CHAMPS;i++)
 			{
@@ -122,7 +123,7 @@ int main(int argc, char *argv[], char *envp[])
 					if ((i == 3) || (i == 4))
 					{
 						champActuel = i;
-						modificationMarqueur = true;
+						modificationMarqueur = TRUE;
 						break;
 					}
 					else
@@ -138,9 +139,9 @@ int main(int argc, char *argv[], char *envp[])
 			}
 
 
-			if (modificationMarqueur == true)
+			if (modificationMarqueur == TRUE)
 			{
-				modificationMarqueur = false;
+				modificationMarqueur = FALSE;
 				continue;
 			}
 		
@@ -150,7 +151,7 @@ int main(int argc, char *argv[], char *envp[])
 			case 0:  /* [CryptageType] */
 				if (strstr(pBuffer, o_VALEUR_CHAMPS[0]) != NULL)
 				{
-					if (champRemplie == true)
+					if (champRemplie == TRUE)
 					{
 						printf(" Many parameters for mark %s \n", o_CHAMPS_SCRIPT[champActuel]);
 						if (commandeScript.clefCryptage != NULL)
@@ -161,15 +162,15 @@ int main(int argc, char *argv[], char *envp[])
 					}
 					else
 					{
-						champRemplie = true;
-						presenceMarqueur = false;
+						champRemplie = TRUE;
+						presenceMarqueur = FALSE;
 						commandeScript.typeCryptage = 0;
 					}
 				}
 
 				if (strstr(pBuffer, o_VALEUR_CHAMPS[1]) != NULL)
 				{
-					if (champRemplie == true)
+					if (champRemplie == TRUE)
 					{
 						printf(" Many parameters for mark %s \n", o_CHAMPS_SCRIPT[champActuel]);
 						if (commandeScript.clefCryptage != NULL)
@@ -180,8 +181,8 @@ int main(int argc, char *argv[], char *envp[])
 					}
 					else
 					{
-						champRemplie = true;
-						presenceMarqueur = false;
+						champRemplie = TRUE;
+						presenceMarqueur = FALSE;
 						commandeScript.typeCryptage = 1;
 					}
 				}
@@ -190,7 +191,7 @@ int main(int argc, char *argv[], char *envp[])
 			case 1:  /* [Action] */
 				if (strstr(pBuffer, o_VALEUR_CHAMPS[2]) != NULL)
 				{
-					if (champRemplie == true)
+					if (champRemplie == TRUE)
 					{
 						printf(" Many parameters for mark %s \n", o_CHAMPS_SCRIPT[champActuel]);
 						if (commandeScript.clefCryptage != NULL)
@@ -201,15 +202,15 @@ int main(int argc, char *argv[], char *envp[])
 					}
 					else
 					{
-						champRemplie = true;
-						presenceMarqueur = false;
+						champRemplie = TRUE;
+						presenceMarqueur = FALSE;
 						commandeScript.typeAction = 0;
 					}
 				}
 
 				if (strstr(pBuffer, o_VALEUR_CHAMPS[3]) != NULL)
 				{
-					if (champRemplie == true)
+					if (champRemplie == TRUE)
 					{
 						printf(" Many parameters for mark %s \n", o_CHAMPS_SCRIPT[champActuel]);
 						if (commandeScript.clefCryptage != NULL)
@@ -220,8 +221,8 @@ int main(int argc, char *argv[], char *envp[])
 					}
 					else
 					{
-						champRemplie = true;
-						presenceMarqueur = false;
+						champRemplie = TRUE;
+						presenceMarqueur = FALSE;
 						commandeScript.typeAction = 1;
 					}
 				}
@@ -231,7 +232,7 @@ int main(int argc, char *argv[], char *envp[])
 				if ((pBuffer[0] == '-') && (pBuffer[1] == '>'))
 				{
 					/* le champs est valide */
-					if (champRemplie == true)
+					if (champRemplie == TRUE)
 					{
 						printf(" Many parameters for mark %s \n", o_CHAMPS_SCRIPT[champActuel]);
 						if (commandeScript.clefCryptage != NULL)
@@ -242,8 +243,8 @@ int main(int argc, char *argv[], char *envp[])
 					}
 					else
 					{
-						champRemplie = true;
-						presenceMarqueur = false;
+						champRemplie = TRUE;
+						presenceMarqueur = FALSE;
 						commandeScript.clefCryptage = (unsigned char*) malloc (strlen(pBuffer) - 1);
 						if (commandeScript.clefCryptage == NULL)
 						{
@@ -315,8 +316,8 @@ int main(int argc, char *argv[], char *envp[])
 			{
 				if (strstr(pBuffer, o_CHAMPS_SCRIPT[i]) != NULL)
 				{
-					presenceMarqueur = true;
-					champRemplie = false;
+					presenceMarqueur = TRUE;
+					champRemplie = FALSE;
 					champActuel = i;
 					break;
 				}

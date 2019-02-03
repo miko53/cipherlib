@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
-
+#include "common.h"
 
 int AnalyseFrequence(FILE* pFile, unsigned int* iTabOccurence);
 
@@ -135,22 +135,22 @@ int main(int argc, char *argv[], char *envp[])
   {
     int j;
     char cCourant;
-    bool bTrouve;
+    BOOL bTrouve;
     for (j =0; j<(int)strlen(szTextCrypte);j++)
     {
       cCourant = szTextCrypte[j];
-      bTrouve = false;
+      bTrouve = FALSE;
       for(int k=0;k<26;k++)
       {
         if (cCourant == ppszTableauCesar[0][k])
         {
           printf("%c", ppszTableauCesar[i][k]);
-          bTrouve = true;
+          bTrouve = TRUE;
           break;
         }
       }
 
-      if (bTrouve == false)
+      if (bTrouve == FALSE)
         printf("%c", cCourant);
 
     }

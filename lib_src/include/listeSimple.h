@@ -5,13 +5,13 @@
 
 //#include "stdio.h"
 #include "stdlib.h"
+#include "common.h"
 
 #define         OK           (0)
 #define         ERROR        (-1)
 
 
 typedef unsigned int STATUS;
-typedef enum { FALSE, TRUE } BOOL;
 
 
 #define	EFFACEMENT_PARTIEL	   1

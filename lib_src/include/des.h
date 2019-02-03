@@ -14,8 +14,10 @@ extern "C" {
 #define  o_DES_DECRYPTAGE	2
 
 
-extern int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClefCryptage[], int typeAction);
-extern int cryptageTripleDES( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClefCryptage[], int typeAction);
+extern int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClefCryptage[],
+                         int typeAction);
+extern int cryptageTripleDES( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                              unsigned char pClefCryptage[], int typeAction);
 
 
 

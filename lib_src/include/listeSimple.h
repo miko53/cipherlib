@@ -20,8 +20,8 @@ typedef unsigned int STATUS;
 
 struct StMaillon
 {
-	void* pObjet;
-	struct StMaillon *pSuivant;
+  void* pObjet;
+  struct StMaillon* pSuivant;
 };
 
 typedef struct StMaillon stMaillon;
@@ -50,9 +50,9 @@ extern void* listeSimple_ElementEnQueue(listeSimple* liste);
 extern BOOL listeSimple_EstVide(listeSimple* liste);
 extern int listeSimple_NombreElement(listeSimple* liste);
 
-extern void* listeSimple_IemeElement(listeSimple *liste, int ieme);
+extern void* listeSimple_IemeElement(listeSimple* liste, int ieme);
 
-extern STATUS listeSimple_SupprimerTousElements(listeSimple *liste);
+extern STATUS listeSimple_SupprimerTousElements(listeSimple* liste);
 
 #ifdef __cplusplus
 }

@@ -20,7 +20,7 @@ int main(int argc, char *argv[], char *envp[])
     return 0;
   }
 
-  
+
   pFile = fopen(argv[1],"r");
   if (pFile == NULL)
   {
@@ -78,11 +78,13 @@ int AnalyseFrequence(FILE* pFile, unsigned int* iTabOccurence)
   unsigned char cCharCourante;
   unsigned long toto = 0;
 
-	while(!feof(pFile))
+  while (!feof(pFile))
   {
     nValeurCourante = fgetc(pFile);
     if (nValeurCourante == EOF)
+    {
       break;
+    }
 
     cCharCourante = (unsigned char) nValeurCourante;
 
@@ -94,7 +96,7 @@ int AnalyseFrequence(FILE* pFile, unsigned int* iTabOccurence)
   return 0;
 }
 
-char ppszTableauCesar[26][27] = 
+char ppszTableauCesar[26][27] =
 {
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "BCDEFGHIJKLMNOPQRSTUVWXYZA",
@@ -125,22 +127,22 @@ char ppszTableauCesar[26][27] =
 };
 
 char szTextCrypte[] =
-"MHILY LZA ZBHL XBPZXBL MVYABUHL HWWPBZ JSHBKPBZ JHLJBZ KPJABT HYJHUBT LZA ULBAYVU";
+  "MHILY LZA ZBHL XBPZXBL MVYABUHL HWWPBZ JSHBKPBZ JHLJBZ KPJABT HYJHUBT LZA ULBAYVU";
 
 
-int main(int argc, char *argv[], char *envp[])
+int main(int argc, char* argv[], char* envp[])
 {
   // Decodage chiffre de cesar
-  for(int i = 0;i < 26;i++)
+  for (int i = 0; i < 26; i++)
   {
     int j;
     char cCourant;
     BOOL bTrouve;
-    for (j =0; j<(int)strlen(szTextCrypte);j++)
+    for (j = 0; j < (int)strlen(szTextCrypte); j++)
     {
       cCourant = szTextCrypte[j];
       bTrouve = FALSE;
-      for(int k=0;k<26;k++)
+      for (int k = 0; k < 26; k++)
       {
         if (cCourant == ppszTableauCesar[0][k])
         {
@@ -151,7 +153,9 @@ int main(int argc, char *argv[], char *envp[])
       }
 
       if (bTrouve == FALSE)
+      {
         printf("%c", cCourant);
+      }
 
     }
     printf("\n");

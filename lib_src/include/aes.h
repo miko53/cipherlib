@@ -12,10 +12,10 @@ typedef enum
 } AES_STATUS;
 
 extern AES_STATUS aes_cipher(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClef[],
-                             int nLongueurBlock, int nLongueurClef);
+                             int nLongueurBlockInBits, int nLongueurClefInBits);
 
 extern AES_STATUS aes_uncipher(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[], unsigned char pClef[],
-                               int nLongueurBlock, int nLongueurClef);
+                               int nLongueurBlockInBits, int nLongueurClefInBits);
 
 
 #ifdef __cplusplus

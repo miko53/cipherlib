@@ -5,6 +5,11 @@
 #include "des.h"
 
 /* constantes */
+typedef enum
+{
+  DES_CRYPTAGE,
+  DES_DECRYPTAGE
+} des_cipheringAction;
 
 const int des_nbBouclesDES = 16;
 
@@ -139,17 +144,51 @@ const int des_tablePermutationDerniere[] =
 
 
 /* static function declaration */
-
-/* declaration de fonctions */
 static void des_bitPermutation2(int noBit1, int noBit2, unsigned char* element, unsigned char* sortie);
 static void des_generateurCleCodage(unsigned char* pcCle, unsigned char tabSortieCle[][6]);
 static unsigned char des_pariteBit(unsigned char octetTest);
 static unsigned char des_selection4bits(unsigned char paquet6bits, int noBloc);
 
+static DES_STATUS des_ciphering ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                  unsigned char pClefCryptage[],
+                                  des_cipheringAction typeAction);
+static DES_STATUS des_tripleCiphering( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                       unsigned char pClefCryptage[],
+                                       des_cipheringAction typeAction);
 
-/* public function implementation */
-AES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClefCryptage[],
-                        int typeAction)
+DES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                        unsigned char pClefCryptage[],
+                        int nLenTextToCrypt, int nLenKey)
+{
+  return des_ciphering (pTexteACrypter, pTexteCrypter, pClefCryptage, DES_CRYPTAGE);
+}
+
+
+DES_STATUS des_uncipher ( unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
+                          unsigned char pClefCryptage[],
+                          int nLenTextToCrypt, int nLenKey)
+{
+  return des_ciphering (pTexteCrypter, pTexteDeCrypte, pClefCryptage, DES_DECRYPTAGE);
+}
+
+extern DES_STATUS des_tripleCipher( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                    unsigned char pClefCryptage[],
+                                    int nLenTextToCrypt, int nLenKey)
+{
+  return des_tripleCiphering(pTexteACrypter, pTexteCrypter, pClefCryptage, DES_CRYPTAGE);
+}
+
+extern DES_STATUS des_tripleUncipher( unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
+                                      unsigned char pClefCryptage[],
+                                      int nLenTextToCrypt, int nLenKey)
+{
+  return des_tripleCiphering(pTexteCrypter, pTexteDeCrypte, pClefCryptage, DES_DECRYPTAGE);
+}
+
+
+static DES_STATUS des_ciphering ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                  unsigned char pClefCryptage[],
+                                  des_cipheringAction typeAction)
 {
   register int i, j;
 
@@ -169,7 +208,7 @@ AES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCryp
 
   unsigned char tempo;
 
-  if ((typeAction != o_DES_CRYPTAGE) && (typeAction != o_DES_DECRYPTAGE))
+  if ((typeAction != DES_CRYPTAGE) && (typeAction != DES_DECRYPTAGE))
   {
     return DES_FAILED;
   }
@@ -212,7 +251,7 @@ AES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCryp
       des_bitPermutation2(des_tablePermutation32a48bits[i - 1], i, Droit, valeur48bits);
     }
 
-    if (typeAction == o_DES_CRYPTAGE)
+    if (typeAction == DES_CRYPTAGE)
     {
       for (i = 0; i < 6; i++)
       {
@@ -298,9 +337,9 @@ AES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCryp
 }
 
 
-AES_STATUS des_tripleCipher( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                             unsigned char pClefCryptage[],
-                             int typeAction)
+static DES_STATUS des_tripleCiphering( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                       unsigned char pClefCryptage[],
+                                       des_cipheringAction typeAction)
 {
   register int i;
   unsigned char pClefCryptage1[9];
@@ -319,23 +358,23 @@ AES_STATUS des_tripleCipher( unsigned char pTexteACrypter[], unsigned char pText
     pClefCryptage3[i] = pClefCryptage[16 + i];
   }
 
-  if ((typeAction != o_DES_CRYPTAGE) && (typeAction != o_DES_DECRYPTAGE))
+  if ((typeAction != DES_CRYPTAGE) && (typeAction != DES_DECRYPTAGE))
   {
     return DES_FAILED;
   }
 
 
-  if (typeAction == o_DES_CRYPTAGE)
+  if (typeAction == DES_CRYPTAGE)
   {
-    des_cipher(pTexteACrypter, pTexteCrypter, pClefCryptage1, o_DES_CRYPTAGE);
-    des_cipher(pTexteCrypter, pTexteCrypter, pClefCryptage2, o_DES_CRYPTAGE);
-    des_cipher(pTexteCrypter, pTexteCrypter, pClefCryptage3, o_DES_CRYPTAGE);
+    des_ciphering(pTexteACrypter, pTexteCrypter, pClefCryptage1, DES_CRYPTAGE);
+    des_ciphering(pTexteCrypter, pTexteCrypter, pClefCryptage2, DES_CRYPTAGE);
+    des_ciphering(pTexteCrypter, pTexteCrypter, pClefCryptage3, DES_CRYPTAGE);
   }
   else
   {
-    des_cipher(pTexteACrypter, pTexteCrypter, pClefCryptage3, o_DES_DECRYPTAGE);
-    des_cipher(pTexteCrypter, pTexteCrypter, pClefCryptage2, o_DES_DECRYPTAGE);
-    des_cipher(pTexteCrypter, pTexteCrypter, pClefCryptage1, o_DES_DECRYPTAGE);
+    des_ciphering(pTexteACrypter, pTexteCrypter, pClefCryptage3, DES_DECRYPTAGE);
+    des_ciphering(pTexteCrypter, pTexteCrypter, pClefCryptage2, DES_DECRYPTAGE);
+    des_ciphering(pTexteCrypter, pTexteCrypter, pClefCryptage1, DES_DECRYPTAGE);
   }
 
   return DES_OK;

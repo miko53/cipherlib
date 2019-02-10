@@ -120,7 +120,7 @@ static unsigned long aes_rotByte(unsigned long dwValue);
 static unsigned long aes_subByte(unsigned long dwValue);
 
 AES_STATUS aes_cipher(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClef[],
-                      int nLongueurBlock, int nLongueurClef)
+                      int nLongueurBlockInBits, int nLongueurClefInBits)
 {
   int Nb;
   int Nk;
@@ -131,19 +131,20 @@ AES_STATUS aes_cipher(unsigned char pTexteACrypter[], unsigned char pTexteCrypte
   unsigned char byTabBlock[4][aes_nMaxNb];
 
   // Verification Longueur de block et longueur de la clef
-  if ((nLongueurBlock == 128) || (nLongueurBlock == 192) || (nLongueurBlock == 256))
+  // check that text to cipher len in bits is OK.
+  if ((nLongueurBlockInBits == 128) || (nLongueurBlockInBits == 192) || (nLongueurBlockInBits == 256))
   {
-    Nb = nLongueurBlock / 32;
+    Nb = nLongueurBlockInBits / 32;
   }
   else
   {
     return AES_FAILED;
   }
 
-
-  if ((nLongueurClef == 128) || (nLongueurClef == 192) || (nLongueurClef == 256))
+  //check key len in bits is OK
+  if ((nLongueurClefInBits == 128) || (nLongueurClefInBits == 192) || (nLongueurClefInBits == 256))
   {
-    Nk = nLongueurClef / 32;
+    Nk = nLongueurClefInBits / 32;
   }
   else
   {
@@ -175,7 +176,7 @@ AES_STATUS aes_cipher(unsigned char pTexteACrypter[], unsigned char pTexteCrypte
       break;
 
     default:
-      return (-1);
+      return AES_FAILED;
   }
 
   //Calcul de l'expansion de la clef
@@ -225,7 +226,7 @@ AES_STATUS aes_cipher(unsigned char pTexteACrypter[], unsigned char pTexteCrypte
 
 
 AES_STATUS aes_uncipher(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[], unsigned char pClef[],
-                        int nLongueurBlock, int nLongueurClef)
+                        int nLongueurBlockInBits, int nLongueurClefInBits)
 {
   int Nb;
   int Nk;
@@ -236,9 +237,9 @@ AES_STATUS aes_uncipher(unsigned char pTexteCrypter[], unsigned char pTexteDeCry
   unsigned char byTabBlock[4][aes_nMaxNb];
 
   // Verification Longueur de block et longueur de la clef
-  if ((nLongueurBlock == 128) || (nLongueurBlock == 192) || (nLongueurBlock == 256))
+  if ((nLongueurBlockInBits == 128) || (nLongueurBlockInBits == 192) || (nLongueurBlockInBits == 256))
   {
-    Nb = nLongueurBlock / 32;
+    Nb = nLongueurBlockInBits / 32;
   }
   else
   {
@@ -246,9 +247,9 @@ AES_STATUS aes_uncipher(unsigned char pTexteCrypter[], unsigned char pTexteDeCry
   }
 
 
-  if ((nLongueurClef == 128) || (nLongueurClef == 192) || (nLongueurClef == 256))
+  if ((nLongueurClefInBits == 128) || (nLongueurClefInBits == 192) || (nLongueurClefInBits == 256))
   {
-    Nk = nLongueurClef / 32;
+    Nk = nLongueurClefInBits / 32;
   }
   else
   {

@@ -6,7 +6,7 @@
 CTEST(aes_test, test_aes_simple)
 {
   unsigned char sTextACrypter[] = "ClaudiusCaligula";
-  unsigned char sClef[]         = "1234567890987654";
+  unsigned char sClef[]         = "123456789ABCDEF0";
   unsigned char sTextCrypter[17];;
   unsigned char sResultatApresDecryptage[17];
   int result;

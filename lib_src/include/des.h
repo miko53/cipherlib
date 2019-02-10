@@ -9,17 +9,23 @@ typedef enum
 {
   DES_OK = 0,
   DES_FAILED = -1
-} AES_STATUS;
+} DES_STATUS;
 
-#define  o_DES_CRYPTAGE     1
-#define  o_DES_DECRYPTAGE   2
-
-
-extern AES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+extern DES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
                                unsigned char pClefCryptage[],
-                               int typeAction);
-extern AES_STATUS des_tripleCipher( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                                    unsigned char pClefCryptage[], int typeAction);
+                               int nLenTextToCrypt, int nLenKey);
+
+extern DES_STATUS des_uncipher ( unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
+                                 unsigned char pClefCryptage[],
+                                 int nLenTextToCrypt, int nLenKey);
+
+extern DES_STATUS des_tripleCipher( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                    unsigned char pClefCryptage[],
+                                    int nLenTextToCrypt, int nLenKey);
+
+extern DES_STATUS des_tripleUncipher( unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
+                                      unsigned char pClefCryptage[],
+                                      int nLenTextToCrypt, int nLenKey);
 
 #ifdef __cplusplus
 }

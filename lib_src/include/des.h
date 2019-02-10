@@ -8,7 +8,9 @@ extern "C" {
 typedef enum
 {
   DES_OK = 0,
-  DES_FAILED = -1
+  DES_FAILED = -1,
+  DES_WRONG_TEXT_LEN = -2,
+  DES_WRONG_KEY_LEN = -3
 } DES_STATUS;
 
 extern DES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],

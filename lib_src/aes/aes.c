@@ -1,9 +1,9 @@
 #include "aes.h"
 
-const int nMaxRound = 14;
-const int nMaxNb = 8;
+static const int aes_nMaxRound = 14;
+static const int aes_nMaxNb = 8;
 
-const unsigned char byByteSubTransformation[256] =
+static const unsigned char aes_byByteSubTransformation[256] =
 {
   99, 124, 119, 123, 242, 107, 111, 197,  48,   1, 103,  43, 254, 215, 171, 118,
   202, 130, 201, 125, 250,  89,  71, 240, 173, 212, 162, 175, 156, 164, 114, 192,
@@ -23,7 +23,7 @@ const unsigned char byByteSubTransformation[256] =
   140, 161, 137,  13, 191, 230,  66, 104,  65, 153,  45,  15, 176,  84, 187,  22
 };
 
-const unsigned char byInvByteSubTransformation[256] =
+static const unsigned char aes_byInvByteSubTransformation[256] =
 {
   82,   9, 106, 213,  48,  54, 165,  56, 191,  64, 163, 158, 129, 243, 215, 251,
   124, 227,  57, 130, 155,  47, 255, 135,  52, 142,  67,  68, 196, 222, 233, 203,
@@ -44,7 +44,7 @@ const unsigned char byInvByteSubTransformation[256] =
 };
 
 
-const unsigned char byLogtable[256] =
+static const unsigned char aes_byLogtable[256] =
 {
   0,   0,  25,   1,  50,   2,  26, 198,  75, 199,  27, 104,  51, 238, 223,   3,
   100,   4, 224,  14,  52, 141, 129, 239,  76, 113,   8, 200, 248, 105,  28, 193,
@@ -65,7 +65,7 @@ const unsigned char byLogtable[256] =
 };
 
 
-const unsigned char byAlogtable[256] =
+static const unsigned char aes_byAlogtable[256] =
 {
   1,   3,   5,  15,  17,  51,  85, 255,  26,  46, 114, 150, 161, 248,  19,  53,
   95, 225,  56,  72, 216, 115, 149, 164, 247,   2,   6,  10,  30,  34, 102, 170,
@@ -86,47 +86,49 @@ const unsigned char byAlogtable[256] =
 };
 
 
-const unsigned long dwRoundCnst[30] =
+static const unsigned long aes_dwRoundCnst[30] =
 {
   0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a, 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91
 };
 
 
-void MixColumn(unsigned char byArrayBlock[4][nMaxNb], int nNb);
-void InvMixColumn(unsigned char byArrayBlock[4][nMaxNb], int nNb);
+static void aes_mixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
+static void aes_invMixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
 
-unsigned char MultiplicationGF2Poly(unsigned char a, unsigned char b);
-void ShiftRow(unsigned char byArrayBlock[4][nMaxNb], int nNb);
-void InvShiftRow(unsigned char byArrayBlock[4][nMaxNb], int nNb);
+static unsigned char aes_multiplicationGF2Poly(unsigned char a, unsigned char b);
+static void aes_shiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
+static void aes_invShiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
 
-void RotationLignes(unsigned char byArrayBlock[4][nMaxNb], int nNb, int nNoLigne, int NbRotation);
-void RotationLignesDroite(unsigned char byArrayBlock[4][nMaxNb], int nNb, int nNoLigne, int NbRotation);
+static void aes_rotationLignes(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb, int nNoLigne, int NbRotation);
+static void aes_rotationLignesDroite(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb, int nNoLigne, int NbRotation);
 
-void InvByteSub(unsigned char byArrayBlock[4][nMaxNb], int nNb);
-void ByteSub(unsigned char byArrayBlock[4][nMaxNb], int nNb);
+static void aes_invByteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
+static void aes_byteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
 
-void FormatteBlock(unsigned char byBlock[], unsigned char byArrayBlock[4][nMaxNb], int nNb);
-void FormatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][nMaxNb][nMaxRound + 1], int nNb, int nNr);
+static void aes_formatteBlock(unsigned char byBlock[], unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
+static void aes_formatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1], int nNb,
+                            int nNr);
 
-void AddRoundKey(unsigned char byArrayBlock[4][nMaxNb], int nNb, unsigned char byBlockKey[4][nMaxNb][nMaxRound + 1],
-                 int nRound);
+static void aes_addRoundKey(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb,
+                            unsigned char byBlockKey[4][aes_nMaxNb][aes_nMaxRound + 1],
+                            int nRound);
 
-void CalculExpansionKeyInf6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr);
-void CalculExpansionKeySup6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr);
+static void aes_calculExpansionKeyInf6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr);
+static void aes_calculExpansionKeySup6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr);
 
-unsigned long RotByte(unsigned long dwValue);
-unsigned long SubByte(unsigned long dwValue);
+static unsigned long aes_rotByte(unsigned long dwValue);
+static unsigned long aes_subByte(unsigned long dwValue);
 
-int AEScryptage(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClef[],
-                int nLongueurBlock, int nLongueurClef)
+AES_STATUS aes_cipher(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClef[],
+                      int nLongueurBlock, int nLongueurClef)
 {
   int Nb;
   int Nk;
   int Nr;
   int nCurrentRound = 0;
-  unsigned long dwTabKey[nMaxNb * (nMaxRound + 1)]; // = {0};
-  unsigned char byTabKey[4][nMaxNb][nMaxRound + 1]; // = {0};
-  unsigned char byTabBlock[4][nMaxNb];// = {0};
+  unsigned long dwTabKey[aes_nMaxNb * (aes_nMaxRound + 1)];
+  unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1];
+  unsigned char byTabBlock[4][aes_nMaxNb];
 
   // Verification Longueur de block et longueur de la clef
   if ((nLongueurBlock == 128) || (nLongueurBlock == 192) || (nLongueurBlock == 256))
@@ -135,7 +137,7 @@ int AEScryptage(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], u
   }
   else
   {
-    return (-1);
+    return AES_FAILED;
   }
 
 
@@ -145,7 +147,7 @@ int AEScryptage(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], u
   }
   else
   {
-    return (-1);
+    return AES_FAILED;
   }
 
   //Calcul du nombre de rounds necc. pour les longeurs données
@@ -179,30 +181,30 @@ int AEScryptage(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], u
   //Calcul de l'expansion de la clef
   if (Nk <= 6)
   {
-    CalculExpansionKeyInf6(pClef, dwTabKey, Nk, Nb, Nr);
+    aes_calculExpansionKeyInf6(pClef, dwTabKey, Nk, Nb, Nr);
   }
   else
   {
-    CalculExpansionKeySup6(pClef, dwTabKey, Nk, Nb, Nr);
+    aes_calculExpansionKeySup6(pClef, dwTabKey, Nk, Nb, Nr);
   }
 
-  FormatteKey(dwTabKey, byTabKey, Nb, Nr);
-  FormatteBlock(pTexteACrypter, byTabBlock, Nb);
+  aes_formatteKey(dwTabKey, byTabKey, Nb, Nr);
+  aes_formatteBlock(pTexteACrypter, byTabBlock, Nb);
 
   //nCurrentRound = 0;
-  AddRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
+  aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
 
   for (nCurrentRound = 1; nCurrentRound < Nr; nCurrentRound++)
   {
-    ByteSub(byTabBlock, Nb);
-    ShiftRow(byTabBlock, Nb);
-    MixColumn(byTabBlock, Nb);
-    AddRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
+    aes_byteSub(byTabBlock, Nb);
+    aes_shiftRow(byTabBlock, Nb);
+    aes_mixColumn(byTabBlock, Nb);
+    aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
   }
 
-  ByteSub(byTabBlock, Nb);
-  ShiftRow(byTabBlock, Nb);
-  AddRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
+  aes_byteSub(byTabBlock, Nb);
+  aes_shiftRow(byTabBlock, Nb);
+  aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
 
 
   //Reconstitution du tableau final
@@ -217,21 +219,21 @@ int AEScryptage(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], u
     }
   }
 
-  return 0;
+  return AES_OK;
 }
 
 
 
-int AESDecryptage(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[], unsigned char pClef[],
-                  int nLongueurBlock, int nLongueurClef)
+AES_STATUS aes_uncipher(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[], unsigned char pClef[],
+                        int nLongueurBlock, int nLongueurClef)
 {
   int Nb;
   int Nk;
   int Nr;
   int nCurrentRound = 0;
-  unsigned long dwTabKey[nMaxNb * (nMaxRound + 1)]; // = {0};
-  unsigned char byTabKey[4][nMaxNb][nMaxRound + 1];
-  unsigned char byTabBlock[4][nMaxNb];
+  unsigned long dwTabKey[aes_nMaxNb * (aes_nMaxRound + 1)];
+  unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1];
+  unsigned char byTabBlock[4][aes_nMaxNb];
 
   // Verification Longueur de block et longueur de la clef
   if ((nLongueurBlock == 128) || (nLongueurBlock == 192) || (nLongueurBlock == 256))
@@ -240,7 +242,7 @@ int AESDecryptage(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[]
   }
   else
   {
-    return (-1);
+    return AES_FAILED;
   }
 
 
@@ -250,7 +252,7 @@ int AESDecryptage(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[]
   }
   else
   {
-    return (-1);
+    return AES_FAILED;
   }
 
   //Calcul du nombre de rounds necc. pour les longeurs données
@@ -278,38 +280,38 @@ int AESDecryptage(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[]
       break;
 
     default:
-      return (-1);
+      return AES_FAILED;
   }
 
   //Calcul de l'expansion de la clef
   if (Nk <= 6)
   {
-    CalculExpansionKeyInf6(pClef, dwTabKey, Nk, Nb, Nr);
+    aes_calculExpansionKeyInf6(pClef, dwTabKey, Nk, Nb, Nr);
   }
   else
   {
-    CalculExpansionKeySup6(pClef, dwTabKey, Nk, Nb, Nr);
+    aes_calculExpansionKeySup6(pClef, dwTabKey, Nk, Nb, Nr);
   }
 
-  FormatteKey(dwTabKey, byTabKey, Nb, Nr);
-  FormatteBlock(pTexteCrypter, byTabBlock, Nb);
+  aes_formatteKey(dwTabKey, byTabKey, Nb, Nr);
+  aes_formatteBlock(pTexteCrypter, byTabBlock, Nb);
 
 
   nCurrentRound = Nr;
-  AddRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
-  InvShiftRow(byTabBlock, Nb);
-  InvByteSub(byTabBlock, Nb);
+  aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
+  aes_invShiftRow(byTabBlock, Nb);
+  aes_invByteSub(byTabBlock, Nb);
 
 
   for (nCurrentRound = Nr - 1; nCurrentRound > 0; nCurrentRound--)
   {
-    AddRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
-    InvMixColumn(byTabBlock, Nb);
-    InvShiftRow(byTabBlock, Nb);
-    InvByteSub(byTabBlock, Nb);
+    aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
+    aes_invMixColumn(byTabBlock, Nb);
+    aes_invShiftRow(byTabBlock, Nb);
+    aes_invByteSub(byTabBlock, Nb);
   }
 
-  AddRoundKey(byTabBlock, Nb, byTabKey, 0);
+  aes_addRoundKey(byTabBlock, Nb, byTabKey, 0);
 
   //Reconstitution du tableau final
   int i;
@@ -323,28 +325,28 @@ int AESDecryptage(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[]
     }
   }
 
-  return 0;
+  return AES_OK;
 }
 
 
-void InvShiftRow(unsigned char byArrayBlock[4][nMaxNb], int nNb)
+static void aes_invShiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
   if ((nNb == 4) || (nNb == 6))
   {
-    RotationLignesDroite(byArrayBlock, nNb, 1, 1);
-    RotationLignesDroite(byArrayBlock, nNb, 2, 2);
-    RotationLignesDroite(byArrayBlock, nNb, 3, 3);
+    aes_rotationLignesDroite(byArrayBlock, nNb, 1, 1);
+    aes_rotationLignesDroite(byArrayBlock, nNb, 2, 2);
+    aes_rotationLignesDroite(byArrayBlock, nNb, 3, 3);
   }
   else
   {
-    RotationLignesDroite(byArrayBlock, nNb, 1, 1);
-    RotationLignesDroite(byArrayBlock, nNb, 2, 3);
-    RotationLignesDroite(byArrayBlock, nNb, 3, 4);
+    aes_rotationLignesDroite(byArrayBlock, nNb, 1, 1);
+    aes_rotationLignesDroite(byArrayBlock, nNb, 2, 3);
+    aes_rotationLignesDroite(byArrayBlock, nNb, 3, 4);
   }
 }
 
 
-void RotationLignesDroite(unsigned char byArrayBlock[4][nMaxNb], int nNb, int nNoLigne, int NbRotation)
+static void aes_rotationLignesDroite(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb, int nNoLigne, int NbRotation)
 {
   int i;
   int j;
@@ -364,33 +366,33 @@ void RotationLignesDroite(unsigned char byArrayBlock[4][nMaxNb], int nNb, int nN
 }
 
 
-void InvMixColumn(unsigned char byArrayBlock[4][nMaxNb], int nNb)
+static void aes_invMixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
-  unsigned char byTempArray[4][nMaxNb];
+  unsigned char byTempArray[4][aes_nMaxNb];
   int i;
   int j;
 
   for (i = 0; i < nNb; i++)
   {
-    byTempArray[0][i] = MultiplicationGF2Poly(0x0E, byArrayBlock[0][i]) ^
-                        MultiplicationGF2Poly(0x0B, byArrayBlock[1][i]) ^
-                        MultiplicationGF2Poly(0x0D, byArrayBlock[2][i]) ^
-                        MultiplicationGF2Poly(0x09, byArrayBlock[3][i]);
+    byTempArray[0][i] = aes_multiplicationGF2Poly(0x0E, byArrayBlock[0][i]) ^
+                        aes_multiplicationGF2Poly(0x0B, byArrayBlock[1][i]) ^
+                        aes_multiplicationGF2Poly(0x0D, byArrayBlock[2][i]) ^
+                        aes_multiplicationGF2Poly(0x09, byArrayBlock[3][i]);
 
-    byTempArray[1][i] = MultiplicationGF2Poly(0x09, byArrayBlock[0][i]) ^
-                        MultiplicationGF2Poly(0x0E, byArrayBlock[1][i]) ^
-                        MultiplicationGF2Poly(0x0B, byArrayBlock[2][i]) ^
-                        MultiplicationGF2Poly(0x0D, byArrayBlock[3][i]);
+    byTempArray[1][i] = aes_multiplicationGF2Poly(0x09, byArrayBlock[0][i]) ^
+                        aes_multiplicationGF2Poly(0x0E, byArrayBlock[1][i]) ^
+                        aes_multiplicationGF2Poly(0x0B, byArrayBlock[2][i]) ^
+                        aes_multiplicationGF2Poly(0x0D, byArrayBlock[3][i]);
 
-    byTempArray[2][i] = MultiplicationGF2Poly(0x0D, byArrayBlock[0][i]) ^
-                        MultiplicationGF2Poly(0x09, byArrayBlock[1][i]) ^
-                        MultiplicationGF2Poly(0x0E, byArrayBlock[2][i]) ^
-                        MultiplicationGF2Poly(0x0B, byArrayBlock[3][i]);
+    byTempArray[2][i] = aes_multiplicationGF2Poly(0x0D, byArrayBlock[0][i]) ^
+                        aes_multiplicationGF2Poly(0x09, byArrayBlock[1][i]) ^
+                        aes_multiplicationGF2Poly(0x0E, byArrayBlock[2][i]) ^
+                        aes_multiplicationGF2Poly(0x0B, byArrayBlock[3][i]);
 
-    byTempArray[3][i] = MultiplicationGF2Poly(0x0B, byArrayBlock[0][i]) ^
-                        MultiplicationGF2Poly(0x0D, byArrayBlock[1][i]) ^
-                        MultiplicationGF2Poly(0x09, byArrayBlock[2][i]) ^
-                        MultiplicationGF2Poly(0x0E, byArrayBlock[3][i]);
+    byTempArray[3][i] = aes_multiplicationGF2Poly(0x0B, byArrayBlock[0][i]) ^
+                        aes_multiplicationGF2Poly(0x0D, byArrayBlock[1][i]) ^
+                        aes_multiplicationGF2Poly(0x09, byArrayBlock[2][i]) ^
+                        aes_multiplicationGF2Poly(0x0E, byArrayBlock[3][i]);
   }
 
   for (i = 0; i < nNb; i++)
@@ -403,33 +405,33 @@ void InvMixColumn(unsigned char byArrayBlock[4][nMaxNb], int nNb)
 }
 
 
-void MixColumn(unsigned char byArrayBlock[4][nMaxNb], int nNb)
+static void aes_mixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
-  unsigned char byTempArray[4][nMaxNb];
+  unsigned char byTempArray[4][aes_nMaxNb];
   int i;
   int j;
 
   for (i = 0; i < nNb; i++)
   {
-    byTempArray[0][i] = MultiplicationGF2Poly(0x02, byArrayBlock[0][i]) ^
-                        MultiplicationGF2Poly(0x03, byArrayBlock[1][i]) ^
-                        MultiplicationGF2Poly(0x01, byArrayBlock[2][i]) ^
-                        MultiplicationGF2Poly(0x01, byArrayBlock[3][i]);
+    byTempArray[0][i] = aes_multiplicationGF2Poly(0x02, byArrayBlock[0][i]) ^
+                        aes_multiplicationGF2Poly(0x03, byArrayBlock[1][i]) ^
+                        aes_multiplicationGF2Poly(0x01, byArrayBlock[2][i]) ^
+                        aes_multiplicationGF2Poly(0x01, byArrayBlock[3][i]);
 
-    byTempArray[1][i] = MultiplicationGF2Poly(0x01, byArrayBlock[0][i]) ^
-                        MultiplicationGF2Poly(0x02, byArrayBlock[1][i]) ^
-                        MultiplicationGF2Poly(0x03, byArrayBlock[2][i]) ^
-                        MultiplicationGF2Poly(0x01, byArrayBlock[3][i]);
+    byTempArray[1][i] = aes_multiplicationGF2Poly(0x01, byArrayBlock[0][i]) ^
+                        aes_multiplicationGF2Poly(0x02, byArrayBlock[1][i]) ^
+                        aes_multiplicationGF2Poly(0x03, byArrayBlock[2][i]) ^
+                        aes_multiplicationGF2Poly(0x01, byArrayBlock[3][i]);
 
-    byTempArray[2][i] = MultiplicationGF2Poly(0x01, byArrayBlock[0][i]) ^
-                        MultiplicationGF2Poly(0x01, byArrayBlock[1][i]) ^
-                        MultiplicationGF2Poly(0x02, byArrayBlock[2][i]) ^
-                        MultiplicationGF2Poly(0x03, byArrayBlock[3][i]);
+    byTempArray[2][i] = aes_multiplicationGF2Poly(0x01, byArrayBlock[0][i]) ^
+                        aes_multiplicationGF2Poly(0x01, byArrayBlock[1][i]) ^
+                        aes_multiplicationGF2Poly(0x02, byArrayBlock[2][i]) ^
+                        aes_multiplicationGF2Poly(0x03, byArrayBlock[3][i]);
 
-    byTempArray[3][i] = MultiplicationGF2Poly(0x03, byArrayBlock[0][i]) ^
-                        MultiplicationGF2Poly(0x01, byArrayBlock[1][i]) ^
-                        MultiplicationGF2Poly(0x01, byArrayBlock[2][i]) ^
-                        MultiplicationGF2Poly(0x02, byArrayBlock[3][i]);
+    byTempArray[3][i] = aes_multiplicationGF2Poly(0x03, byArrayBlock[0][i]) ^
+                        aes_multiplicationGF2Poly(0x01, byArrayBlock[1][i]) ^
+                        aes_multiplicationGF2Poly(0x01, byArrayBlock[2][i]) ^
+                        aes_multiplicationGF2Poly(0x02, byArrayBlock[3][i]);
   }
 
   for (i = 0; i < nNb; i++)
@@ -442,11 +444,11 @@ void MixColumn(unsigned char byArrayBlock[4][nMaxNb], int nNb)
 }
 
 
-unsigned char MultiplicationGF2Poly(unsigned char a, unsigned char b)
+unsigned char aes_multiplicationGF2Poly(unsigned char a, unsigned char b)
 {
   if (a && b)
   {
-    return byAlogtable[(byLogtable[a] + byLogtable[b]) % 255];
+    return aes_byAlogtable[(aes_byLogtable[a] + aes_byLogtable[b]) % 255];
   }
   else
   {
@@ -455,23 +457,23 @@ unsigned char MultiplicationGF2Poly(unsigned char a, unsigned char b)
 }
 
 
-void ShiftRow(unsigned char byArrayBlock[4][nMaxNb], int nNb)
+static void aes_shiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
   if ((nNb == 4) || (nNb == 6))
   {
-    RotationLignes(byArrayBlock, nNb, 1, 1);
-    RotationLignes(byArrayBlock, nNb, 2, 2);
-    RotationLignes(byArrayBlock, nNb, 3, 3);
+    aes_rotationLignes(byArrayBlock, nNb, 1, 1);
+    aes_rotationLignes(byArrayBlock, nNb, 2, 2);
+    aes_rotationLignes(byArrayBlock, nNb, 3, 3);
   }
   else
   {
-    RotationLignes(byArrayBlock, nNb, 1, 1);
-    RotationLignes(byArrayBlock, nNb, 2, 3);
-    RotationLignes(byArrayBlock, nNb, 3, 4);
+    aes_rotationLignes(byArrayBlock, nNb, 1, 1);
+    aes_rotationLignes(byArrayBlock, nNb, 2, 3);
+    aes_rotationLignes(byArrayBlock, nNb, 3, 4);
   }
 }
 
-void RotationLignes(unsigned char byArrayBlock[4][nMaxNb], int nNb, int nNoLigne, int NbRotation)
+static void aes_rotationLignes(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb, int nNoLigne, int NbRotation)
 {
   int i;
   int j;
@@ -490,7 +492,7 @@ void RotationLignes(unsigned char byArrayBlock[4][nMaxNb], int nNb, int nNoLigne
   }
 }
 
-void InvByteSub(unsigned char byArrayBlock[4][nMaxNb], int nNb)
+static void aes_invByteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
   int i;
   int j;
@@ -499,13 +501,13 @@ void InvByteSub(unsigned char byArrayBlock[4][nMaxNb], int nNb)
   {
     for ( j = 0; j < nNb; j++)
     {
-      byArrayBlock[i][j] = byInvByteSubTransformation[byArrayBlock[i][j]];
+      byArrayBlock[i][j] = aes_byInvByteSubTransformation[byArrayBlock[i][j]];
     }
   }
 }
 
 
-void ByteSub(unsigned char byArrayBlock[4][nMaxNb], int nNb)
+static void aes_byteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
   int i;
   int j;
@@ -514,14 +516,15 @@ void ByteSub(unsigned char byArrayBlock[4][nMaxNb], int nNb)
   {
     for ( j = 0; j < nNb; j++)
     {
-      byArrayBlock[i][j] = byByteSubTransformation[byArrayBlock[i][j]];
+      byArrayBlock[i][j] = aes_byByteSubTransformation[byArrayBlock[i][j]];
     }
   }
 }
 
 
-void AddRoundKey(unsigned char byArrayBlock[4][nMaxNb], int nNb, unsigned char byBlockKey[4][nMaxNb][nMaxRound + 1],
-                 int nRound)
+static void aes_addRoundKey(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb,
+                            unsigned char byBlockKey[4][aes_nMaxNb][aes_nMaxRound + 1],
+                            int nRound)
 {
   int i;
   int j;
@@ -536,7 +539,7 @@ void AddRoundKey(unsigned char byArrayBlock[4][nMaxNb], int nNb, unsigned char b
 }
 
 
-void FormatteBlock(unsigned char byBlock[], unsigned char byArrayBlock[4][nMaxNb], int nNb)
+static void aes_formatteBlock(unsigned char byBlock[], unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
   int j;
 
@@ -550,7 +553,8 @@ void FormatteBlock(unsigned char byBlock[], unsigned char byArrayBlock[4][nMaxNb
 }
 
 
-void FormatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][nMaxNb][nMaxRound + 1], int nNb, int nNr)
+static void aes_formatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1], int nNb,
+                            int nNr)
 {
   int i;
   int j;
@@ -569,7 +573,7 @@ void FormatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][nMaxNb][nMa
 }
 
 
-void CalculExpansionKeyInf6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr)
+static void aes_calculExpansionKeyInf6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr)
 {
   int i;
   unsigned long dwTemp;
@@ -587,7 +591,7 @@ void CalculExpansionKeyInf6(unsigned char pClef[], unsigned long dwTabKey[], int
     dwTemp = dwTabKey[i - 1];
     if ((i % nNk) == 0)
     {
-      dwTemp = SubByte(RotByte(dwTemp)) ^ dwRoundCnst[i / nNk];
+      dwTemp = aes_subByte(aes_rotByte(dwTemp)) ^ aes_dwRoundCnst[i / nNk];
     }
 
     dwTabKey[i] = dwTabKey[i - nNk] ^ dwTemp;
@@ -596,7 +600,7 @@ void CalculExpansionKeyInf6(unsigned char pClef[], unsigned long dwTabKey[], int
 
 
 /* Ici Nk = 8 */
-void CalculExpansionKeySup6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr)
+static void aes_calculExpansionKeySup6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr)
 {
   int i;
   unsigned long dwTemp;
@@ -614,13 +618,13 @@ void CalculExpansionKeySup6(unsigned char pClef[], unsigned long dwTabKey[], int
     dwTemp = dwTabKey[i - 1];
     if ((i % nNk) == 0)
     {
-      dwTemp = SubByte(RotByte(dwTemp)) ^ dwRoundCnst[i / nNk];
+      dwTemp = aes_subByte(aes_rotByte(dwTemp)) ^ aes_dwRoundCnst[i / nNk];
     }
     else
     {
       if ((i % nNk) == 4)
       {
-        dwTemp = SubByte(dwTemp);
+        dwTemp = aes_subByte(dwTemp);
       }
     }
 
@@ -630,14 +634,14 @@ void CalculExpansionKeySup6(unsigned char pClef[], unsigned long dwTabKey[], int
 }
 
 
-unsigned long RotByte(unsigned long dwValue)
+static unsigned long aes_rotByte(unsigned long dwValue)
 {
   return ((dwValue << 8) | (unsigned char) (dwValue >> 24));
 }
 
 
 
-unsigned long SubByte(unsigned long dwValue)
+static unsigned long aes_subByte(unsigned long dwValue)
 {
   unsigned char byTemp0;
   unsigned char byTemp1;
@@ -649,16 +653,14 @@ unsigned long SubByte(unsigned long dwValue)
   byTemp2 = (unsigned char) (dwValue >> 8);
   byTemp3 = (unsigned char) (dwValue);
 
-  byTemp0 = byByteSubTransformation[byTemp0];
-  byTemp1 = byByteSubTransformation[byTemp1];
-  byTemp2 = byByteSubTransformation[byTemp2];
-  byTemp3 = byByteSubTransformation[byTemp3];
+  byTemp0 = aes_byByteSubTransformation[byTemp0];
+  byTemp1 = aes_byByteSubTransformation[byTemp1];
+  byTemp2 = aes_byByteSubTransformation[byTemp2];
+  byTemp3 = aes_byByteSubTransformation[byTemp3];
 
   return (((unsigned long) byTemp0) << 24 |
           ((unsigned long) byTemp1) << 16 |
           ((unsigned long) byTemp2) << 8 |
           byTemp3);
 }
-
-
 

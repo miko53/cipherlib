@@ -10,10 +10,10 @@ CTEST(des_test, test_des_simple)
   unsigned char cryptResult[8];
   unsigned char uncryptResult[8];
   int result;
-  result = cryptageDES(toCrypt, cryptResult, key, o_DES_CRYPTAGE);
+  result = des_cipher(toCrypt, cryptResult, key, o_DES_CRYPTAGE);
   ASSERT_EQUAL(result, 0);
 
-  result = cryptageDES(cryptResult, uncryptResult, key, o_DES_DECRYPTAGE);
+  result = des_cipher(cryptResult, uncryptResult, key, o_DES_DECRYPTAGE);
   ASSERT_EQUAL(result, 0);
 
   //data shall be the same after deciphering
@@ -27,10 +27,10 @@ CTEST(des_test, test_triple_des_simple)
   unsigned char cryptResult[8];
   unsigned char uncryptResult[8];
   int result;
-  result = cryptageTripleDES(toCrypt, cryptResult, key3, o_DES_CRYPTAGE);
+  result = des_tripleCipher(toCrypt, cryptResult, key3, o_DES_CRYPTAGE);
   ASSERT_EQUAL(result, 0);
 
-  result = cryptageTripleDES(cryptResult, uncryptResult, key3, o_DES_DECRYPTAGE);
+  result = des_tripleCipher(cryptResult, uncryptResult, key3, o_DES_DECRYPTAGE);
   ASSERT_EQUAL(result, 0);
 
   //data shall be the same after deciphering

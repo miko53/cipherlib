@@ -1,6 +1,3 @@
-
-
-
 /* DES.c implementation file  */
 /* M. Sergent 02-2001;04-2001 */
 
@@ -9,11 +6,9 @@
 
 /* constantes */
 
+const int des_nbBouclesDES = 16;
 
-const int nbBouclesDES = 16;//16;
-
-
-const int tablePermutation[] =
+const int des_tablePermutation[] =
 {
   58, 50, 42, 34, 26, 18, 10, 2,
   60, 52, 44, 36, 28, 20, 12, 4,
@@ -25,7 +20,7 @@ const int tablePermutation[] =
   63, 55, 47, 39, 31, 23, 15, 7
 };
 
-const int tablePermutation32a48bits[] =
+const int des_tablePermutation32a48bits[] =
 {
   32, 1, 2, 3, 4, 5,
   4, 5, 6, 7, 8, 9,
@@ -37,7 +32,7 @@ const int tablePermutation32a48bits[] =
   28, 29, 30, 31, 32, 1
 };
 
-const int tablePermutation64a56bits[] =
+const int des_tablePermutation64a56bits[] =
 {
   57, 49, 41, 33, 25, 17, 9,
   1, 58, 50, 42, 34, 26, 18,
@@ -50,7 +45,7 @@ const int tablePermutation64a56bits[] =
   21, 13, 5, 28, 20, 12, 4
 };
 
-const int tablePermutation56a48bits[] =
+const int des_tablePermutation56a48bits[] =
 {
   14, 17, 11, 24, 1, 5,
   3, 28, 15, 6, 21, 10,
@@ -62,10 +57,10 @@ const int tablePermutation56a48bits[] =
   46, 42, 50, 36, 29, 32
 };
 
-const int tableDecalage[] =
+const int des_tableDecalage[] =
 { 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };
 
-const unsigned char tableauSelectionBlocs[8][4][16] =
+const unsigned char des_tableauSelectionBlocs[8][4][16] =
 {
   {   /* 1 */
     { 14,  4, 13,  1,  2, 15, 11,  8,  3, 10,  6, 12,  5,  9,  0,  7 },
@@ -117,7 +112,7 @@ const unsigned char tableauSelectionBlocs[8][4][16] =
   }
 };
 
-const int tablePermutationFinaleDroit[] =
+const int des_tablePermutationFinaleDroit[] =
 {
   16,  7, 20, 21,
   29, 12, 28, 17,
@@ -130,7 +125,7 @@ const int tablePermutationFinaleDroit[] =
 };
 
 
-const int tablePermutationDerniere[] =
+const int des_tablePermutationDerniere[] =
 {
   40, 8, 48, 16, 56, 24, 64, 32,
   39, 7, 47, 15, 55, 23, 63, 31,
@@ -146,15 +141,15 @@ const int tablePermutationDerniere[] =
 /* static function declaration */
 
 /* declaration de fonctions */
-static void bitPermutation2(int noBit1, int noBit2, unsigned char* element, unsigned char* sortie);
-static void generateurCleCodage(unsigned char* pcCle, unsigned char tabSortieCle[][6]);
-static unsigned char pariteBit(unsigned char octetTest);
-static unsigned char selection4bits(unsigned char paquet6bits, int noBloc);
+static void des_bitPermutation2(int noBit1, int noBit2, unsigned char* element, unsigned char* sortie);
+static void des_generateurCleCodage(unsigned char* pcCle, unsigned char tabSortieCle[][6]);
+static unsigned char des_pariteBit(unsigned char octetTest);
+static unsigned char des_selection4bits(unsigned char paquet6bits, int noBloc);
 
 
 /* public function implementation */
-int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClefCryptage[],
-                  int typeAction)
+AES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClefCryptage[],
+                        int typeAction)
 {
   register int i, j;
 
@@ -176,15 +171,15 @@ int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
 
   if ((typeAction != o_DES_CRYPTAGE) && (typeAction != o_DES_DECRYPTAGE))
   {
-    return -1;
+    return DES_FAILED;
   }
 
-  generateurCleCodage(pClefCryptage, cleGeneree);
+  des_generateurCleCodage(pClefCryptage, cleGeneree);
 
   /* permutation d'entree */
   for (i = 1; i < 65; i++)
   {
-    bitPermutation2(tablePermutation[i - 1], i, pTexteACrypter, sortiePermutationInitiale);
+    des_bitPermutation2(des_tablePermutation[i - 1], i, pTexteACrypter, sortiePermutationInitiale);
   }
 
   for (i = 0; i < 4; i++)
@@ -197,7 +192,7 @@ int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
     Droit[i] = sortiePermutationInitiale[4 + i];
   }
 
-  for (j = 0; j < nbBouclesDES; j++)
+  for (j = 0; j < des_nbBouclesDES; j++)
   {
     /* mise a zero des variables critiques */
     for (i = 0; i < 4; i++)
@@ -214,7 +209,7 @@ int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
     /* partie droite de 32bits a 48bits par une permutation */
     for (i = 1; i < 49; i++)
     {
-      bitPermutation2(tablePermutation32a48bits[i - 1], i, Droit, valeur48bits);
+      des_bitPermutation2(des_tablePermutation32a48bits[i - 1], i, Droit, valeur48bits);
     }
 
     if (typeAction == o_DES_CRYPTAGE)
@@ -232,7 +227,6 @@ int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
       }
     }
 
-
     bloc6Bits[0] = ( valeurApresCle[0] >> 2);
     bloc6Bits[1] = ((valeurApresCle[0] & 0x03) << 4) + ((valeurApresCle[1] & 0xF0) >> 4);
     bloc6Bits[2] = ((valeurApresCle[1] & 0x0F) << 2) + ((valeurApresCle[2] & 0xC0) >> 6);
@@ -245,7 +239,7 @@ int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
     /* Reconstitution des 32 bits droits */
     for (i = 0; i < 8; i++)
     {
-      tempo = selection4bits(bloc6Bits[i], i);
+      tempo = des_selection4bits(bloc6Bits[i], i);
       if ((i % 2) == 0)
       {
         tempo = tempo << 4;
@@ -257,10 +251,10 @@ int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
     /* derniere permutation  sur les bits droits */
     for (i = 1; i < 33; i++)
     {
-      bitPermutation2(tablePermutationFinaleDroit[i - 1], i, DroitAvantPermutation, DroitApresPermutation);
+      des_bitPermutation2(des_tablePermutationFinaleDroit[i - 1], i, DroitAvantPermutation, DroitApresPermutation);
     }
 
-    if (j == (nbBouclesDES - 1))
+    if (j == (des_nbBouclesDES - 1))
     {
       for (i = 0; i < 4; i++)
       {
@@ -296,16 +290,17 @@ int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
 
   for (i = 1; i < 65; i++)
   {
-    bitPermutation2(tablePermutationDerniere[i - 1], i, finCryptage, pTexteCrypter);
+    des_bitPermutation2(des_tablePermutationDerniere[i - 1], i, finCryptage, pTexteCrypter);
   }
 
 
-  return 0;
+  return DES_OK;
 }
 
 
-int cryptageTripleDES( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClefCryptage[],
-                       int typeAction)
+AES_STATUS des_tripleCipher( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                             unsigned char pClefCryptage[],
+                             int typeAction)
 {
   register int i;
   unsigned char pClefCryptage1[9];
@@ -326,24 +321,24 @@ int cryptageTripleDES( unsigned char pTexteACrypter[], unsigned char pTexteCrypt
 
   if ((typeAction != o_DES_CRYPTAGE) && (typeAction != o_DES_DECRYPTAGE))
   {
-    return -1;
+    return DES_FAILED;
   }
 
 
   if (typeAction == o_DES_CRYPTAGE)
   {
-    cryptageDES(pTexteACrypter, pTexteCrypter, pClefCryptage1, o_DES_CRYPTAGE);
-    cryptageDES(pTexteCrypter, pTexteCrypter, pClefCryptage2, o_DES_CRYPTAGE);
-    cryptageDES(pTexteCrypter, pTexteCrypter, pClefCryptage3, o_DES_CRYPTAGE);
+    des_cipher(pTexteACrypter, pTexteCrypter, pClefCryptage1, o_DES_CRYPTAGE);
+    des_cipher(pTexteCrypter, pTexteCrypter, pClefCryptage2, o_DES_CRYPTAGE);
+    des_cipher(pTexteCrypter, pTexteCrypter, pClefCryptage3, o_DES_CRYPTAGE);
   }
   else
   {
-    cryptageDES(pTexteACrypter, pTexteCrypter, pClefCryptage3, o_DES_DECRYPTAGE);
-    cryptageDES(pTexteCrypter, pTexteCrypter, pClefCryptage2, o_DES_DECRYPTAGE);
-    cryptageDES(pTexteCrypter, pTexteCrypter, pClefCryptage1, o_DES_DECRYPTAGE);
+    des_cipher(pTexteACrypter, pTexteCrypter, pClefCryptage3, o_DES_DECRYPTAGE);
+    des_cipher(pTexteCrypter, pTexteCrypter, pClefCryptage2, o_DES_DECRYPTAGE);
+    des_cipher(pTexteCrypter, pTexteCrypter, pClefCryptage1, o_DES_DECRYPTAGE);
   }
 
-  return 0;
+  return DES_OK;
 }
 
 
@@ -354,7 +349,7 @@ int cryptageTripleDES( unsigned char pTexteACrypter[], unsigned char pTexteCrypt
    la fonction crer les 16 cles pour les cycles et les place dans
    tabSortieCle */
 
-static void generateurCleCodage(unsigned char* pcCle, unsigned char tabSortieCle[][6])
+static void des_generateurCleCodage(unsigned char* pcCle, unsigned char tabSortieCle[][6])
 {
   register int i, j;
   unsigned char pcCle2[8] = {0};
@@ -363,18 +358,18 @@ static void generateurCleCodage(unsigned char* pcCle, unsigned char tabSortieCle
 
   for (i = 0; i < 8; i++)
   {
-    pcCle2[i] = (pcCle[i] << 1) + pariteBit(pcCle[i]);
+    pcCle2[i] = (pcCle[i] << 1) + des_pariteBit(pcCle[i]);
   }
 
   for (i = 1; i < 57; i++)
   {
-    bitPermutation2(tablePermutation64a56bits[i - 1], i, pcCle2, valeur56bits);
+    des_bitPermutation2(des_tablePermutation64a56bits[i - 1], i, pcCle2, valeur56bits);
   }
 
   /* decalage a gauche selon table des decalages */
   for (i = 0; i < 16; i++)
   {
-    for (j = 0; j < tableDecalage[i]; j++)
+    for (j = 0; j < des_tableDecalage[i]; j++)
     {
       int k;
       /* effectue une rotation a gauche sur 56 bits */
@@ -389,13 +384,13 @@ static void generateurCleCodage(unsigned char* pcCle, unsigned char tabSortieCle
     /* une fois le bon nombre de rotation effectuer, effectuer la permutation inverse */
     for (j = 1; j < 49; j++)
     {
-      bitPermutation2(tablePermutation56a48bits[j - 1], j, valeur56bits,  &(tabSortieCle[i][0]));
+      des_bitPermutation2(des_tablePermutation56a48bits[j - 1], j, valeur56bits,  &(tabSortieCle[i][0]));
     }
   }
 }
 
 
-static unsigned char pariteBit(unsigned char octetTest)
+static unsigned char des_pariteBit(unsigned char octetTest)
 {
   register int i;
   unsigned char nombreUn = 0;
@@ -423,7 +418,7 @@ static unsigned char pariteBit(unsigned char octetTest)
 }
 
 
-static unsigned char selection4bits(unsigned char paquet6bits, int noBloc)
+static unsigned char des_selection4bits(unsigned char paquet6bits, int noBloc)
 {
   unsigned char ligne;
   unsigned char colonne;
@@ -431,13 +426,13 @@ static unsigned char selection4bits(unsigned char paquet6bits, int noBloc)
   ligne = ((paquet6bits & 0x20) >> 4) + (paquet6bits & 0x01);
   colonne = ((paquet6bits & 0x1E) >> 1);
 
-  return (tableauSelectionBlocs[noBloc][ligne][colonne]);
+  return (des_tableauSelectionBlocs[noBloc][ligne][colonne]);
 }
 
 
 
 
-static void bitPermutation2(int noBit1, int noBit2, unsigned char element[], unsigned char sortie[])
+static void des_bitPermutation2(int noBit1, int noBit2, unsigned char element[], unsigned char sortie[])
 {
   int offset1;
   int offset2;

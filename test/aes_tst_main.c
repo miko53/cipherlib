@@ -11,11 +11,11 @@ CTEST(aes_test, test_aes_simple)
   unsigned char sResultatApresDecryptage[17];
   int result;
 
-  result = AEScryptage(sTextACrypter, sTextCrypter, sClef, 128, 128);
-  ASSERT_EQUAL(result, 0);
+  result = aes_cipher(sTextACrypter, sTextCrypter, sClef, 128, 128);
+  ASSERT_EQUAL(result, AES_OK);
 
-  result = AESDecryptage(sTextCrypter, sResultatApresDecryptage, sClef, 128, 128);
-  ASSERT_EQUAL(result, 0);
+  result = aes_uncipher(sTextCrypter, sResultatApresDecryptage, sClef, 128, 128);
+  ASSERT_EQUAL(result, AES_OK);
 
   ASSERT_DATA(sResultatApresDecryptage, 16, sTextACrypter, 16);
 }

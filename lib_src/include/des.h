@@ -1,29 +1,28 @@
-
-
-
-#ifndef __DES_CRYPTAGE_H
-#define __DES_CRYPTAGE_H
-
+#ifndef DES_H
+#define DES_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+typedef enum
+{
+  DES_OK = 0,
+  DES_FAILED = -1
+} AES_STATUS;
 
-#define  o_DES_CRYPTAGE		1
-#define  o_DES_DECRYPTAGE	2
+#define  o_DES_CRYPTAGE     1
+#define  o_DES_DECRYPTAGE   2
 
 
-extern int cryptageDES ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClefCryptage[],
-                         int typeAction);
-extern int cryptageTripleDES( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                              unsigned char pClefCryptage[], int typeAction);
-
-
+extern AES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                               unsigned char pClefCryptage[],
+                               int typeAction);
+extern AES_STATUS des_tripleCipher( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                    unsigned char pClefCryptage[], int typeAction);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-
-#endif /* __DES_CRYPTAGE_H */
+#endif /* DES_H */

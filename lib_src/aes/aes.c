@@ -1,8 +1,4 @@
-
-
 #include "aes.h"
-
-#include <stdio.h>
 
 const int nMaxRound = 14;
 const int nMaxNb = 8;
@@ -120,47 +116,6 @@ void CalculExpansionKeySup6(unsigned char pClef[], unsigned long dwTabKey[], int
 
 unsigned long RotByte(unsigned long dwValue);
 unsigned long SubByte(unsigned long dwValue);
-
-int main(int argc, char* argv[], char* envp[]);
-int AEScryptage(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClef[],
-                int nLongueurBlock, int nLongueurClef);
-int AESDecryptage(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[], unsigned char pClef[],
-                  int nLongueurBlock, int nLongueurClef);
-
-
-
-int main(int argc, char* argv[], char* envp[])
-{
-
-  unsigned char sTextACrypter[] = "Mickael Sergent ";
-  unsigned char sClef[]         = "1234567890987654";
-  unsigned char sTextCrypter[17] = {0};
-  unsigned char sResultatApresDecryptage[17] = {0};
-  int i;
-
-  AEScryptage(sTextACrypter, sTextCrypter, sClef, 128, 128);
-
-  printf("%s\n", sTextACrypter);
-
-  for (i = 0; i < 17; i++)
-  {
-    printf(" %i --> %.2x\n", i, sTextCrypter[i]);
-  }
-
-
-  AESDecryptage(sTextCrypter, sResultatApresDecryptage, sClef, 128, 128);
-
-  for (i = 0; i < 17; i++)
-  {
-    printf(" %i --> %.2x\n", i, sResultatApresDecryptage[i]);
-  }
-
-  printf("%s\n", sResultatApresDecryptage);
-
-  return 0;
-}
-
-
 
 int AEScryptage(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClef[],
                 int nLongueurBlock, int nLongueurClef)

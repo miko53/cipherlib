@@ -1,9 +1,7 @@
-
 #define CTEST_MAIN
 
 #include "ctest.h"
 #include "des.h"
-
 
 CTEST(des_test, test_des_simple)
 {
@@ -43,6 +41,6 @@ CTEST(des_test, test_triple_des_simple)
 int main(int argc, const char* argv[])
 {
   int result = ctest_main(argc, argv);
-  
+
   return result;
 }

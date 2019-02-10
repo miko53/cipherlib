@@ -1,8 +1,13 @@
 
 include_directories(${CIPHER_INCLUDE_DIR})
 
-add_executable(cipher_test main.c)
-target_link_libraries(cipher_test cipher)
+# add_executable(cipher_test main.c)
+# target_link_libraries(cipher_test cipher)
+# 
+# add_executable(cipher_test1 main_cryp.c)
+# target_link_libraries(cipher_test1 cipher)
 
-add_executable(cipher_test1 main_cryp.c)
-target_link_libraries(cipher_test1 cipher)
+add_executable(des_tests des_tst_main.c)
+target_link_libraries(des_tests cipher)
+
+add_test(test_des des_tests)

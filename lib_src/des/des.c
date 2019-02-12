@@ -4,6 +4,7 @@
 /* realisation d'algo data encryption standard */
 #include "des.h"
 #include <assert.h>
+#include <stddef.h>
 
 /* constantes */
 typedef enum
@@ -224,6 +225,236 @@ extern DES_STATUS des_tripleUncipher( unsigned char pTexteCrypter[], unsigned ch
   }
 
   return des_tripleCiphering(pTexteCrypter, pTexteDeCrypte, pClefCryptage, DES_DECRYPTAGE);
+}
+
+DES_STATUS des_generateKey(des_obj* des, unsigned char cypherKey[], int nKeyLen)
+{
+  DES_STATUS status;
+  status = DES_FAILED;
+
+  if (nKeyLen != 64)
+  {
+    status = DES_WRONG_KEY_LEN;
+  }
+  else if (des != NULL)
+  {
+    des_generateurCleCodage(cypherKey, des->cleGeneree);
+    des->context = 1;
+    status = DES_OK;
+  }
+
+  return status;
+}
+
+DES_STATUS des_init(des_obj* des)
+{
+  if (des != NULL)
+  {
+    des->context = 0;
+    return DES_OK;
+  }
+
+  return DES_FAILED;
+}
+
+static DES_STATUS des_ciphering2 (des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                  des_cipheringAction typeAction);
+
+
+DES_STATUS des_cipher2(des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], int nLenTextToCrypt,
+                       int nLenKey)
+{
+  if (des == NULL)
+  {
+    return DES_FAILED;
+  }
+
+  if (des->context != 1)
+  {
+    return DES_FAILED;
+  }
+
+  if (nLenTextToCrypt != 64)
+  {
+    return DES_WRONG_TEXT_LEN;
+  }
+
+  if (nLenKey != 64)
+  {
+    return DES_WRONG_KEY_LEN;
+  }
+
+  return des_ciphering2(des, pTexteACrypter, pTexteCrypter, DES_CRYPTAGE);
+}
+
+
+DES_STATUS des_uncipher2(des_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
+                         int nLenTextToCrypt, int nLenKey)
+{
+  if (des == NULL)
+  {
+    return DES_FAILED;
+  }
+
+  if (des->context != 1)
+  {
+    return DES_FAILED;
+  }
+
+  if (nLenTextToCrypt != 64)
+  {
+    return DES_WRONG_TEXT_LEN;
+  }
+
+  if (nLenKey != 64)
+  {
+    return DES_WRONG_KEY_LEN;
+  }
+
+  return des_ciphering2(des, pTexteCrypter, pTexteDeCrypte, DES_DECRYPTAGE);
+}
+
+
+static DES_STATUS des_ciphering2 (des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                  des_cipheringAction typeAction)
+{
+  register int i, j;
+
+  unsigned char sortiePermutationInitiale[8];
+  unsigned char finCryptage[8];
+  unsigned char bloc6Bits[8];
+
+  unsigned char Gauche[4];
+  unsigned char Droit[4];
+  unsigned char DroitAvantPermutation[4];
+  unsigned char DroitApresPermutation[4];
+
+  unsigned char valeur48bits[6];
+  unsigned char valeurApresCle[6];
+
+  unsigned char tempo;
+
+  assert((typeAction == DES_CRYPTAGE) || (typeAction == DES_DECRYPTAGE));
+  assert((des != NULL) && (des->context == 1));
+
+
+  /* permutation d'entree */
+  for (i = 1; i < 65; i++)
+  {
+    des_bitPermutation2(des_tablePermutation[i - 1], i, pTexteACrypter, sortiePermutationInitiale);
+  }
+
+  for (i = 0; i < 4; i++)
+  {
+    Gauche[i] = sortiePermutationInitiale[i];
+  }
+
+  for (i = 0; i < 4; i++)
+  {
+    Droit[i] = sortiePermutationInitiale[4 + i];
+  }
+
+  for (j = 0; j < des_nbBouclesDES; j++)
+  {
+    /* mise a zero des variables critiques */
+    for (i = 0; i < 4; i++)
+    {
+      valeur48bits[i] = 0;
+      DroitAvantPermutation[i] = 0;
+      DroitApresPermutation[i] = 0;
+    }
+
+    valeur48bits[4] = 0;
+    valeur48bits[5] = 0;
+
+
+    /* partie droite de 32bits a 48bits par une permutation */
+    for (i = 1; i < 49; i++)
+    {
+      des_bitPermutation2(des_tablePermutation32a48bits[i - 1], i, Droit, valeur48bits);
+    }
+
+    if (typeAction == DES_CRYPTAGE)
+    {
+      for (i = 0; i < 6; i++)
+      {
+        valeurApresCle[i] = valeur48bits[i] ^ des->cleGeneree[j][i];
+      }
+    }
+    else
+    {
+      for (i = 0; i < 6; i++)
+      {
+        valeurApresCle[i] = valeur48bits[i] ^ des->cleGeneree[15 - j][i];
+      }
+    }
+
+    bloc6Bits[0] = ( valeurApresCle[0] >> 2);
+    bloc6Bits[1] = ((valeurApresCle[0] & 0x03) << 4) + ((valeurApresCle[1] & 0xF0) >> 4);
+    bloc6Bits[2] = ((valeurApresCle[1] & 0x0F) << 2) + ((valeurApresCle[2] & 0xC0) >> 6);
+    bloc6Bits[3] = ( valeurApresCle[2] & 0x3F);
+    bloc6Bits[4] = ( valeurApresCle[3] >> 2);
+    bloc6Bits[5] = ((valeurApresCle[3] & 0x03) << 4) + ((valeurApresCle[4] & 0xF0) >> 4);
+    bloc6Bits[6] = ((valeurApresCle[4] & 0x0F) << 2) + ((valeurApresCle[5] & 0xC0) >> 6);
+    bloc6Bits[7] = ( valeurApresCle[5] & 0x3F);
+
+    /* Reconstitution des 32 bits droits */
+    for (i = 0; i < 8; i++)
+    {
+      tempo = des_selection4bits(bloc6Bits[i], i);
+      if ((i % 2) == 0)
+      {
+        tempo = tempo << 4;
+      }
+
+      DroitAvantPermutation[(i >> 1)] += tempo;
+    }
+
+    /* derniere permutation  sur les bits droits */
+    for (i = 1; i < 33; i++)
+    {
+      des_bitPermutation2(des_tablePermutationFinaleDroit[i - 1], i, DroitAvantPermutation, DroitApresPermutation);
+    }
+
+    if (j == (des_nbBouclesDES - 1))
+    {
+      for (i = 0; i < 4; i++)
+      {
+        finCryptage[4 + i] = Droit[i];
+      }
+
+      for (i = 0; i < 4; i++)
+      {
+        finCryptage[i] = DroitApresPermutation[i] ^ Gauche[i];
+      }
+    }
+    else
+    {
+      for (i = 0; i < 4; i++)
+      {
+        finCryptage[i] = Droit[i];
+      }
+
+      for (i = 0; i < 4; i++)
+      {
+        finCryptage[4 + i] = DroitApresPermutation[i] ^ Gauche[i];
+      }
+    }
+
+    for (i = 0; i < 4; i++)
+    {
+      Gauche[i] = finCryptage[i];
+      Droit[i] = finCryptage[i + 4];
+    }
+  }
+
+  for (i = 1; i < 65; i++)
+  {
+    des_bitPermutation2(des_tablePermutationDerniere[i - 1], i, finCryptage, pTexteCrypter);
+  }
+
+  return DES_OK;
+
 }
 
 

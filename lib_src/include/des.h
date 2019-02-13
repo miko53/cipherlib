@@ -26,17 +26,17 @@ typedef struct
 
 extern DES_STATUS des_init(des_obj* des);
 extern DES_STATUS des_generateKey(des_obj* des, unsigned char cypherKey[], int nKeyLen);
-extern DES_STATUS des_cipher2(des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                              int nLenTextToCrypt, int nLenKey);
-extern DES_STATUS des_uncipher2(des_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
-                                int nLenTextToCrypt, int nLenKey);
+extern DES_STATUS des_cipher(des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                             int nLenTextToCrypt, int nLenKey);
+extern DES_STATUS des_uncipher(des_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
+                               int nLenTextToCrypt, int nLenKey);
 
 extern DES_STATUS des3_init(des3_obj* des);
 extern DES_STATUS des3_generateKey(des3_obj* des, unsigned char cypherKey[], int nKeyLen);
-extern DES_STATUS des3_cipher2(des3_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                               int nLenTextToCrypt, int nLenKey);
-extern DES_STATUS des3_uncipher2(des3_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
-                                 int nLenTextToCrypt, int nLenKey);
+extern DES_STATUS des3_cipher(des3_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                              int nLenTextToCrypt, int nLenKey);
+extern DES_STATUS des3_uncipher(des3_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
+                                int nLenTextToCrypt, int nLenKey);
 
 #ifdef __cplusplus
 }

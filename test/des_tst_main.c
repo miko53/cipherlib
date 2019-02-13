@@ -88,10 +88,10 @@ CTEST(des_obj, cyphering_with_obj)
   status = des_generateKey(&obj, key, 8 * 8);
   ASSERT_EQUAL(status, DES_OK);
 
-  status = des_cipher2(&obj, toCrypt, cryptResult, 64, 64);
+  status = des_cipher(&obj, toCrypt, cryptResult, 64, 64);
   ASSERT_EQUAL(status, DES_OK);
 
-  status = des_uncipher2(&obj, cryptResult, uncryptResult, 64, 64);
+  status = des_uncipher(&obj, cryptResult, uncryptResult, 64, 64);
   ASSERT_EQUAL(status, DES_OK);
 
   //data shall be the same after deciphering
@@ -127,10 +127,10 @@ CTEST(des3_obj, test_triple_des_simple)
   status = des3_generateKey(&obj, key3, 3 * 8 * 8);
   ASSERT_EQUAL(status, DES_OK);
 
-  status = des3_cipher2(&obj, toCrypt, cryptResult, 64, 192);
+  status = des3_cipher(&obj, toCrypt, cryptResult, 64, 192);
   ASSERT_EQUAL(status, DES_OK);
 
-  status = des3_uncipher2(&obj, cryptResult, uncryptResult, 64, 192);
+  status = des3_uncipher(&obj, cryptResult, uncryptResult, 64, 192);
   ASSERT_EQUAL(status, DES_OK);
 
   //data shall be the same after deciphering

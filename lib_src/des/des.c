@@ -151,6 +151,9 @@ static void des_generateurCleCodage(unsigned char* pcCle, unsigned char tabSorti
 static unsigned char des_pariteBit(unsigned char octetTest);
 static unsigned char des_selection4bits(unsigned char paquet6bits, int noBloc);
 
+static DES_STATUS des_ciphering2 (des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                  des_cipheringAction typeAction);
+
 static DES_STATUS des_ciphering ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
                                   unsigned char pClefCryptage[],
                                   des_cipheringAction typeAction);
@@ -256,10 +259,6 @@ DES_STATUS des_init(des_obj* des)
 
   return DES_FAILED;
 }
-
-static DES_STATUS des_ciphering2 (des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                                  des_cipheringAction typeAction);
-
 
 DES_STATUS des_cipher2(des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], int nLenTextToCrypt,
                        int nLenKey)
@@ -456,6 +455,124 @@ static DES_STATUS des_ciphering2 (des_obj* des, unsigned char pTexteACrypter[], 
   return DES_OK;
 
 }
+
+
+
+/**************/
+/* Triple DES */
+/**************/
+
+DES_STATUS des3_generateKey(des3_obj* des, unsigned char cypherKey[], int nKeyLen)
+{
+  DES_STATUS status;
+  status = DES_FAILED;
+
+  if (nKeyLen != 192)
+  {
+    status = DES_WRONG_KEY_LEN;
+  }
+  else if (des != NULL)
+  {
+    des_generateurCleCodage(cypherKey, des->clefs[0].cleGeneree);
+    des_generateurCleCodage(cypherKey + 8, des->clefs[1].cleGeneree);
+    des_generateurCleCodage(cypherKey + 16, des->clefs[2].cleGeneree);
+    des->clefs[0].context = 1;
+    des->clefs[1].context = 1;
+    des->clefs[2].context = 1;
+    status = DES_OK;
+  }
+
+  return status;
+}
+
+DES_STATUS des3_init(des3_obj* des)
+{
+  if (des != NULL)
+  {
+    des->clefs[0].context = 0;
+    des->clefs[1].context = 0;
+    des->clefs[2].context = 0;
+    return DES_OK;
+  }
+
+  return DES_FAILED;
+}
+
+static DES_STATUS des3_ciphering2(des3_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                  des_cipheringAction typeAction);
+
+DES_STATUS des3_cipher2(des3_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                        int nLenTextToCrypt, int nLenKey)
+{
+  if (des == NULL)
+  {
+    return DES_FAILED;
+  }
+
+  if (des->clefs[0].context != 1)
+  {
+    return DES_FAILED;
+  }
+
+  if (nLenTextToCrypt != 64)
+  {
+    return DES_WRONG_TEXT_LEN;
+  }
+
+  if (nLenKey != 192)
+  {
+    return DES_WRONG_KEY_LEN;
+  }
+
+  return des3_ciphering2(des, pTexteACrypter, pTexteCrypter, DES_CRYPTAGE);
+}
+
+DES_STATUS des3_uncipher2(des3_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
+                          int nLenTextToCrypt, int nLenKey)
+{
+  if (des == NULL)
+  {
+    return DES_FAILED;
+  }
+
+  if (des->clefs[0].context != 1)
+  {
+    return DES_FAILED;
+  }
+
+  if (nLenTextToCrypt != 64)
+  {
+    return DES_WRONG_TEXT_LEN;
+  }
+
+  if (nLenKey != 192)
+  {
+    return DES_WRONG_KEY_LEN;
+  }
+
+  return des3_ciphering2(des, pTexteCrypter, pTexteDeCrypte, DES_DECRYPTAGE);
+}
+
+
+
+static DES_STATUS des3_ciphering2(des3_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                                  des_cipheringAction typeAction)
+{
+  if (typeAction == DES_CRYPTAGE)
+  {
+    des_ciphering2(&des->clefs[0], pTexteACrypter, pTexteCrypter, DES_CRYPTAGE);
+    des_ciphering2(&des->clefs[1], pTexteCrypter, pTexteCrypter, DES_CRYPTAGE);
+    des_ciphering2(&des->clefs[2], pTexteCrypter, pTexteCrypter, DES_CRYPTAGE);
+  }
+  else
+  {
+    des_ciphering2(&des->clefs[2], pTexteACrypter, pTexteCrypter, DES_DECRYPTAGE);
+    des_ciphering2(&des->clefs[1], pTexteCrypter, pTexteCrypter, DES_DECRYPTAGE);
+    des_ciphering2(&des->clefs[0], pTexteCrypter, pTexteCrypter, DES_DECRYPTAGE);
+  }
+  return DES_OK;
+}
+
 
 
 static DES_STATUS des_ciphering ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],

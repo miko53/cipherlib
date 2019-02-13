@@ -130,6 +130,45 @@ CTEST(des_obj, cyphering_with_obj)
   ASSERT_DATA(uncryptResult, 8, toCrypt, 8);
 }
 
+CTEST(des3_obj, initialization)
+{
+  des3_obj obj;
+  DES_STATUS status;
+  unsigned char key3[] = "ClaudiusClaudiusClaudius";
+
+
+  status = des3_init(&obj);
+  ASSERT_EQUAL(status, DES_OK);
+
+  status = des3_generateKey(&obj, key3, 3 * 8 * 8);
+  ASSERT_EQUAL(status, DES_OK);
+}
+
+CTEST(des3_test, test_triple_des_simple)
+{
+  des3_obj obj;
+  unsigned char toCrypt[] = "Caligula";
+  unsigned char key3[] = "ClaudiusClaudiusClaudius";
+  unsigned char cryptResult[8];
+  unsigned char uncryptResult[8];
+  DES_STATUS status;
+
+  status = des3_init(&obj);
+  ASSERT_EQUAL(status, DES_OK);
+
+  status = des3_generateKey(&obj, key3, 3 * 8 * 8);
+  ASSERT_EQUAL(status, DES_OK);
+
+  status = des3_cipher2(&obj, toCrypt, cryptResult, 64, 192);
+  ASSERT_EQUAL(status, DES_OK);
+
+  status = des3_uncipher2(&obj, cryptResult, uncryptResult, 64, 192);
+  ASSERT_EQUAL(status, DES_OK);
+
+  //data shall be the same after deciphering
+  ASSERT_DATA(uncryptResult, 8, toCrypt, 8);
+}
+
 
 
 int main(int argc, const char* argv[])

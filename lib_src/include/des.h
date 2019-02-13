@@ -19,6 +19,12 @@ typedef struct
   unsigned char cleGeneree[16][6];
 } des_obj;
 
+typedef struct
+{
+  des_obj clefs[3];
+} des3_obj;
+
+
 extern DES_STATUS des_cipher ( unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
                                unsigned char pClefCryptage[],
                                int nLenTextToCrypt, int nLenKey);
@@ -41,6 +47,14 @@ extern DES_STATUS des_cipher2(des_obj* des, unsigned char pTexteACrypter[], unsi
                               int nLenTextToCrypt, int nLenKey);
 extern DES_STATUS des_uncipher2(des_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
                                 int nLenTextToCrypt, int nLenKey);
+
+
+extern DES_STATUS des3_init(des3_obj* des);
+extern DES_STATUS des3_generateKey(des3_obj* des, unsigned char cypherKey[], int nKeyLen);
+extern DES_STATUS des3_cipher2(des3_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                               int nLenTextToCrypt, int nLenKey);
+extern DES_STATUS des3_uncipher2(des3_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
+                                 int nLenTextToCrypt, int nLenKey);
 
 #ifdef __cplusplus
 }

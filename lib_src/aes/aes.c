@@ -119,6 +119,26 @@ static void aes_calculExpansionKeySup6(unsigned char pClef[], unsigned long dwTa
 static unsigned long aes_rotByte(unsigned long dwValue);
 static unsigned long aes_subByte(unsigned long dwValue);
 
+
+static AES_STATUS aes_generateKey(unsigned char pKey[], int nLenKeyInBits)
+{
+  int Nk;
+  //check key len in bits is OK
+  if ((nLenKeyInBits == 128) || (nLenKeyInBits == 192) || (nLenKeyInBits == 256))
+  {
+    Nk = nLenKeyInBits / 32;
+  }
+  else
+  {
+    return AES_FAILED;
+  }
+
+  //TODO
+
+  return AES_OK;
+}
+
+
 AES_STATUS aes_cipher(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClef[],
                       int nLongueurBlockInBits, int nLongueurClefInBits)
 {

@@ -9,8 +9,9 @@ typedef enum
 {
   DES_OK = 0,
   DES_FAILED = -1,
-  DES_WRONG_TEXT_LEN = -2,
-  DES_WRONG_KEY_LEN = -3
+  DES_INIT_FAILED = -2,
+  DES_WRONG_TEXT_LEN = -3,
+  DES_WRONG_KEY_LEN = -4
 } DES_STATUS;
 
 typedef struct
@@ -27,16 +28,16 @@ typedef struct
 extern DES_STATUS des_init(des_obj* des);
 extern DES_STATUS des_generateKey(des_obj* des, unsigned char cypherKey[], int nKeyLen);
 extern DES_STATUS des_cipher(des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                             int nLenTextToCrypt, int nLenKey);
+                             int nLenTextToCrypt);
 extern DES_STATUS des_uncipher(des_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
-                               int nLenTextToCrypt, int nLenKey);
+                               int nLenTextToCrypt);
 
 extern DES_STATUS des3_init(des3_obj* des);
 extern DES_STATUS des3_generateKey(des3_obj* des, unsigned char cypherKey[], int nKeyLen);
 extern DES_STATUS des3_cipher(des3_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                              int nLenTextToCrypt, int nLenKey);
+                              int nLenTextToCrypt);
 extern DES_STATUS des3_uncipher(des3_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
-                                int nLenTextToCrypt, int nLenKey);
+                                int nLenTextToCrypt);
 
 #ifdef __cplusplus
 }

@@ -163,6 +163,7 @@ DES_STATUS des_generateKey(des_obj* des, unsigned char cypherKey[], int nKeyLen)
 
   if (nKeyLen != 64)
   {
+    des->context = 0;
     status = DES_WRONG_KEY_LEN;
   }
   else if (des != NULL)
@@ -186,8 +187,7 @@ DES_STATUS des_init(des_obj* des)
   return DES_FAILED;
 }
 
-DES_STATUS des_cipher(des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], int nLenTextToCrypt,
-                      int nLenKey)
+DES_STATUS des_cipher(des_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], int nLenTextToCrypt)
 {
   if (des == NULL)
   {
@@ -196,17 +196,12 @@ DES_STATUS des_cipher(des_obj* des, unsigned char pTexteACrypter[], unsigned cha
 
   if (des->context != 1)
   {
-    return DES_FAILED;
+    return DES_INIT_FAILED;
   }
 
   if (nLenTextToCrypt != 64)
   {
     return DES_WRONG_TEXT_LEN;
-  }
-
-  if (nLenKey != 64)
-  {
-    return DES_WRONG_KEY_LEN;
   }
 
   return des_ciphering(des, pTexteACrypter, pTexteCrypter, DES_CRYPTAGE);
@@ -214,7 +209,7 @@ DES_STATUS des_cipher(des_obj* des, unsigned char pTexteACrypter[], unsigned cha
 
 
 DES_STATUS des_uncipher(des_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
-                        int nLenTextToCrypt, int nLenKey)
+                        int nLenTextToCrypt)
 {
   if (des == NULL)
   {
@@ -223,17 +218,12 @@ DES_STATUS des_uncipher(des_obj* des, unsigned char pTexteCrypter[], unsigned ch
 
   if (des->context != 1)
   {
-    return DES_FAILED;
+    return DES_INIT_FAILED;
   }
 
   if (nLenTextToCrypt != 64)
   {
     return DES_WRONG_TEXT_LEN;
-  }
-
-  if (nLenKey != 64)
-  {
-    return DES_WRONG_KEY_LEN;
   }
 
   return des_ciphering(des, pTexteCrypter, pTexteDeCrypte, DES_DECRYPTAGE);
@@ -394,6 +384,9 @@ DES_STATUS des3_generateKey(des3_obj* des, unsigned char cypherKey[], int nKeyLe
 
   if (nKeyLen != 192)
   {
+    des->clefs[0].context = 0;
+    des->clefs[1].context = 0;
+    des->clefs[2].context = 0;
     status = DES_WRONG_KEY_LEN;
   }
   else if (des != NULL)
@@ -424,7 +417,7 @@ DES_STATUS des3_init(des3_obj* des)
 }
 
 DES_STATUS des3_cipher(des3_obj* des, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                       int nLenTextToCrypt, int nLenKey)
+                       int nLenTextToCrypt)
 {
   if (des == NULL)
   {
@@ -433,24 +426,19 @@ DES_STATUS des3_cipher(des3_obj* des, unsigned char pTexteACrypter[], unsigned c
 
   if (des->clefs[0].context != 1)
   {
-    return DES_FAILED;
+    return DES_INIT_FAILED;
   }
 
   if (nLenTextToCrypt != 64)
   {
     return DES_WRONG_TEXT_LEN;
-  }
-
-  if (nLenKey != 192)
-  {
-    return DES_WRONG_KEY_LEN;
   }
 
   return des3_ciphering(des, pTexteACrypter, pTexteCrypter, DES_CRYPTAGE);
 }
 
 DES_STATUS des3_uncipher(des3_obj* des, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypte[],
-                         int nLenTextToCrypt, int nLenKey)
+                         int nLenTextToCrypt)
 {
   if (des == NULL)
   {
@@ -459,17 +447,12 @@ DES_STATUS des3_uncipher(des3_obj* des, unsigned char pTexteCrypter[], unsigned 
 
   if (des->clefs[0].context != 1)
   {
-    return DES_FAILED;
+    return DES_INIT_FAILED;
   }
 
   if (nLenTextToCrypt != 64)
   {
     return DES_WRONG_TEXT_LEN;
-  }
-
-  if (nLenKey != 192)
-  {
-    return DES_WRONG_KEY_LEN;
   }
 
   return des3_ciphering(des, pTexteCrypter, pTexteDeCrypte, DES_DECRYPTAGE);

@@ -1,7 +1,9 @@
 #include "aes.h"
-
+#include <assert.h>
+#include <stddef.h>
+/*
 static const int aes_nMaxRound = 14;
-static const int aes_nMaxNb = 8;
+static const int aes_nMaxNb = 8;*/
 
 static const unsigned char aes_byByteSubTransformation[256] =
 {
@@ -119,10 +121,35 @@ static void aes_calculExpansionKeySup6(unsigned char pClef[], unsigned long dwTa
 static unsigned long aes_rotByte(unsigned long dwValue);
 static unsigned long aes_subByte(unsigned long dwValue);
 
+static void aes_doCiphering(aes_obj* aes, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[]);
+static void aes_doUnCiphering(aes_obj* aes, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[]);
 
-static AES_STATUS aes_generateKey(unsigned char pKey[], int nLenKeyInBits)
+
+AES_STATUS aes_init(aes_obj* aes)
 {
+  if (aes == NULL)
+  {
+    return AES_FAILED;
+  }
+
+  aes->context = 0;
+
+  return AES_OK;
+}
+
+
+AES_STATUS aes_generateKey(aes_obj* aes, unsigned char pKey[], int nLenKeyInBits, int nLenBlockInBits)
+{
+  unsigned long dwTabKey[aes_nMaxNb * (aes_nMaxRound + 1)];
   int Nk;
+  int Nb;
+  int Nr;
+
+  if (aes == NULL)
+  {
+    return AES_FAILED;
+  }
+
   //check key len in bits is OK
   if ((nLenKeyInBits == 128) || (nLenKeyInBits == 192) || (nLenKeyInBits == 256))
   {
@@ -133,38 +160,10 @@ static AES_STATUS aes_generateKey(unsigned char pKey[], int nLenKeyInBits)
     return AES_FAILED;
   }
 
-  //TODO
-
-  return AES_OK;
-}
-
-
-AES_STATUS aes_cipher(unsigned char pTexteACrypter[], unsigned char pTexteCrypter[], unsigned char pClef[],
-                      int nLongueurBlockInBits, int nLongueurClefInBits)
-{
-  int Nb;
-  int Nk;
-  int Nr;
-  int nCurrentRound = 0;
-  unsigned long dwTabKey[aes_nMaxNb * (aes_nMaxRound + 1)];
-  unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1];
-  unsigned char byTabBlock[4][aes_nMaxNb];
-
-  // Verification Longueur de block et longueur de la clef
-  // check that text to cipher len in bits is OK.
-  if ((nLongueurBlockInBits == 128) || (nLongueurBlockInBits == 192) || (nLongueurBlockInBits == 256))
+  if ((nLenBlockInBits == 128) || (nLenBlockInBits == 192) || (nLenBlockInBits == 256))
   {
-    Nb = nLongueurBlockInBits / 32;
-  }
-  else
-  {
-    return AES_FAILED;
-  }
-
-  //check key len in bits is OK
-  if ((nLongueurClefInBits == 128) || (nLongueurClefInBits == 192) || (nLongueurClefInBits == 256))
-  {
-    Nk = nLongueurClefInBits / 32;
+    Nb = nLenBlockInBits / 32;
+    aes->nSizeBlockInBits = nLenBlockInBits;
   }
   else
   {
@@ -199,156 +198,149 @@ AES_STATUS aes_cipher(unsigned char pTexteACrypter[], unsigned char pTexteCrypte
       return AES_FAILED;
   }
 
+  aes->Nr = Nr;
+  aes->Nk = Nk;
+  aes->Nb = Nb;
+
   //Calcul de l'expansion de la clef
   if (Nk <= 6)
   {
-    aes_calculExpansionKeyInf6(pClef, dwTabKey, Nk, Nb, Nr);
+    aes_calculExpansionKeyInf6(pKey, dwTabKey, aes->Nk, aes->Nb, aes->Nr);
   }
   else
   {
-    aes_calculExpansionKeySup6(pClef, dwTabKey, Nk, Nb, Nr);
+    aes_calculExpansionKeySup6(pKey, dwTabKey, aes->Nk, aes->Nb, aes->Nr);
   }
 
-  aes_formatteKey(dwTabKey, byTabKey, Nb, Nr);
-  aes_formatteBlock(pTexteACrypter, byTabBlock, Nb);
+  aes_formatteKey(dwTabKey, aes->byTabKey, Nb, Nr);
+
+  aes->context = 1;
+
+  return AES_OK;
+}
+
+
+
+AES_STATUS aes_cipher(aes_obj* aes, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
+                      int nLongueurBlockInBits)
+{
+  AES_STATUS status;
+  status = AES_FAILED;
+
+  if (aes != NULL)
+  {
+    if ((aes->context == 1) && (aes->nSizeBlockInBits == nLongueurBlockInBits))
+    {
+      //we can continue now...
+      aes_doCiphering(aes, pTexteACrypter, pTexteCrypter);
+      status = AES_OK;
+    }
+    else
+    {
+      status = AES_FAILED;
+    }
+  }
+
+  return status;
+}
+
+static void aes_doCiphering(aes_obj* aes, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[])
+{
+  unsigned char byTabBlock[4][aes_nMaxNb];
+  int nCurrentRound = 0;
+
+  assert(aes != NULL);
+
+  aes_formatteBlock(pTexteACrypter, byTabBlock, aes->Nb);
 
   //nCurrentRound = 0;
-  aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
+  aes_addRoundKey(byTabBlock, aes->Nb, aes->byTabKey, nCurrentRound);
 
-  for (nCurrentRound = 1; nCurrentRound < Nr; nCurrentRound++)
+  for (nCurrentRound = 1; nCurrentRound < aes->Nr; nCurrentRound++)
   {
-    aes_byteSub(byTabBlock, Nb);
-    aes_shiftRow(byTabBlock, Nb);
-    aes_mixColumn(byTabBlock, Nb);
-    aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
+    aes_byteSub(byTabBlock, aes->Nb);
+    aes_shiftRow(byTabBlock, aes->Nb);
+    aes_mixColumn(byTabBlock, aes->Nb);
+    aes_addRoundKey(byTabBlock, aes->Nb, aes->byTabKey, nCurrentRound);
   }
 
-  aes_byteSub(byTabBlock, Nb);
-  aes_shiftRow(byTabBlock, Nb);
-  aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
+  aes_byteSub(byTabBlock, aes->Nb);
+  aes_shiftRow(byTabBlock, aes->Nb);
+  aes_addRoundKey(byTabBlock, aes->Nb, aes->byTabKey, nCurrentRound);
 
 
   //Reconstitution du tableau final
   int i;
   int j;
 
-  for (i = 0; i < Nb; i++)
+  for (i = 0; i < aes->Nb; i++)
   {
     for (j = 0; j < 4; j++)
     {
       pTexteCrypter[4 * i + j ] = byTabBlock[j][i];
     }
   }
-
-  return AES_OK;
 }
 
-
-
-AES_STATUS aes_uncipher(unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[], unsigned char pClef[],
-                        int nLongueurBlockInBits, int nLongueurClefInBits)
+AES_STATUS aes_uncipher(aes_obj* aes, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[],
+                        int nLongueurBlockInBits)
 {
-  int Nb;
-  int Nk;
-  int Nr;
-  int nCurrentRound = 0;
-  unsigned long dwTabKey[aes_nMaxNb * (aes_nMaxRound + 1)];
-  unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1];
+  AES_STATUS status;
+  status = AES_FAILED;
+
+  if (aes != NULL)
+  {
+    if ((aes->context == 1) && (aes->nSizeBlockInBits == nLongueurBlockInBits))
+    {
+      //we can continue now...
+      aes_doUnCiphering(aes, pTexteCrypter, pTexteDeCrypter);
+      status = AES_OK;
+    }
+    else
+    {
+      status = AES_FAILED;
+    }
+  }
+
+  return status;
+}
+
+static void aes_doUnCiphering(aes_obj* aes, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[])
+{
+  assert(aes != NULL);
   unsigned char byTabBlock[4][aes_nMaxNb];
+  int nCurrentRound = 0;
 
-  // Verification Longueur de block et longueur de la clef
-  if ((nLongueurBlockInBits == 128) || (nLongueurBlockInBits == 192) || (nLongueurBlockInBits == 256))
-  {
-    Nb = nLongueurBlockInBits / 32;
-  }
-  else
-  {
-    return AES_FAILED;
-  }
+  aes_formatteBlock(pTexteCrypter, byTabBlock, aes->Nb);
+
+  nCurrentRound = aes->Nr;
+  aes_addRoundKey(byTabBlock, aes->Nb, aes->byTabKey, nCurrentRound);
+  aes_invShiftRow(byTabBlock, aes->Nb);
+  aes_invByteSub(byTabBlock, aes->Nb);
 
 
-  if ((nLongueurClefInBits == 128) || (nLongueurClefInBits == 192) || (nLongueurClefInBits == 256))
+  for (nCurrentRound = aes->Nr - 1; nCurrentRound > 0; nCurrentRound--)
   {
-    Nk = nLongueurClefInBits / 32;
-  }
-  else
-  {
-    return AES_FAILED;
+    aes_addRoundKey(byTabBlock, aes->Nb, aes->byTabKey, nCurrentRound);
+    aes_invMixColumn(byTabBlock, aes->Nb);
+    aes_invShiftRow(byTabBlock, aes->Nb);
+    aes_invByteSub(byTabBlock, aes->Nb);
   }
 
-  //Calcul du nombre de rounds necc. pour les longeurs données
-  if (Nk > Nb)
-  {
-    Nr = Nk;
-  }
-  else
-  {
-    Nr = Nb;
-  }
-
-  switch (Nr)
-  {
-    case 4:
-      Nr = 10;
-      break;
-
-    case 6:
-      Nr = 12;
-      break;
-
-    case 8:
-      Nr = 14;
-      break;
-
-    default:
-      return AES_FAILED;
-  }
-
-  //Calcul de l'expansion de la clef
-  if (Nk <= 6)
-  {
-    aes_calculExpansionKeyInf6(pClef, dwTabKey, Nk, Nb, Nr);
-  }
-  else
-  {
-    aes_calculExpansionKeySup6(pClef, dwTabKey, Nk, Nb, Nr);
-  }
-
-  aes_formatteKey(dwTabKey, byTabKey, Nb, Nr);
-  aes_formatteBlock(pTexteCrypter, byTabBlock, Nb);
-
-
-  nCurrentRound = Nr;
-  aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
-  aes_invShiftRow(byTabBlock, Nb);
-  aes_invByteSub(byTabBlock, Nb);
-
-
-  for (nCurrentRound = Nr - 1; nCurrentRound > 0; nCurrentRound--)
-  {
-    aes_addRoundKey(byTabBlock, Nb, byTabKey, nCurrentRound);
-    aes_invMixColumn(byTabBlock, Nb);
-    aes_invShiftRow(byTabBlock, Nb);
-    aes_invByteSub(byTabBlock, Nb);
-  }
-
-  aes_addRoundKey(byTabBlock, Nb, byTabKey, 0);
+  aes_addRoundKey(byTabBlock, aes->Nb, aes->byTabKey, 0);
 
   //Reconstitution du tableau final
   int i;
   int j;
 
-  for (i = 0; i < Nb; i++)
+  for (i = 0; i < aes->Nb; i++)
   {
     for (j = 0; j < 4; j++)
     {
       pTexteDeCrypter[4 * i + j ] = byTabBlock[j][i];
     }
   }
-
-  return AES_OK;
 }
-
 
 static void aes_invShiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
@@ -365,7 +357,6 @@ static void aes_invShiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
     aes_rotationLignesDroite(byArrayBlock, nNb, 3, 4);
   }
 }
-
 
 static void aes_rotationLignesDroite(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb, int nNoLigne, int NbRotation)
 {
@@ -385,7 +376,6 @@ static void aes_rotationLignesDroite(unsigned char byArrayBlock[4][aes_nMaxNb], 
     byArrayBlock[nNoLigne][0] = byTemp;
   }
 }
-
 
 static void aes_invMixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
@@ -425,7 +415,6 @@ static void aes_invMixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
   }
 }
 
-
 static void aes_mixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
   unsigned char byTempArray[4][aes_nMaxNb];
@@ -464,7 +453,6 @@ static void aes_mixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
   }
 }
 
-
 unsigned char aes_multiplicationGF2Poly(unsigned char a, unsigned char b)
 {
   if (a && b)
@@ -476,7 +464,6 @@ unsigned char aes_multiplicationGF2Poly(unsigned char a, unsigned char b)
     return 0;
   }
 }
-
 
 static void aes_shiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 {
@@ -593,7 +580,6 @@ static void aes_formatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][
 
 }
 
-
 static void aes_calculExpansionKeyInf6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr)
 {
   int i;
@@ -654,13 +640,10 @@ static void aes_calculExpansionKeySup6(unsigned char pClef[], unsigned long dwTa
 
 }
 
-
 static unsigned long aes_rotByte(unsigned long dwValue)
 {
   return ((dwValue << 8) | (unsigned char) (dwValue >> 24));
 }
-
-
 
 static unsigned long aes_subByte(unsigned long dwValue)
 {

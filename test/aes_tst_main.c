@@ -10,14 +10,21 @@ CTEST(aes_test, test_aes_simple)
   unsigned char sTextCrypter[17];;
   unsigned char sResultatApresDecryptage[17];
   int result;
+  aes_obj obj;
 
-  result = aes_cipher(sTextACrypter, sTextCrypter, sClef, 128, 128);
+  result = aes_init(&obj);
   ASSERT_EQUAL(result, AES_OK);
 
-  result = aes_uncipher(sTextCrypter, sResultatApresDecryptage, sClef, 128, 128);
+  result = aes_generateKey(&obj, sClef, 128, 128);
   ASSERT_EQUAL(result, AES_OK);
 
-  ASSERT_DATA(sResultatApresDecryptage, 16, sTextACrypter, 16);
+  result = aes_cipher(&obj, sTextACrypter, sTextCrypter, 128);
+  ASSERT_EQUAL(result, AES_OK);
+
+  result = aes_uncipher(&obj, sTextCrypter, sResultatApresDecryptage, 128);
+  ASSERT_EQUAL(result, AES_OK);
+
+  ASSERT_DATA(sTextACrypter, 16, sResultatApresDecryptage, 16);
 }
 
 CTEST(aes_test, test_aes_simple_192_txt_len)
@@ -27,14 +34,21 @@ CTEST(aes_test, test_aes_simple_192_txt_len)
   unsigned char sTextCrypter[25];
   unsigned char sResultatApresDecryptage[25];
   int result;
+  aes_obj obj;
 
-  result = aes_cipher(sTextACrypter, sTextCrypter, sClef, 192, 128);
+  result = aes_init(&obj);
   ASSERT_EQUAL(result, AES_OK);
 
-  result = aes_uncipher(sTextCrypter, sResultatApresDecryptage, sClef, 192, 128);
+  result = aes_generateKey(&obj, sClef, 128, 192);
   ASSERT_EQUAL(result, AES_OK);
 
-  ASSERT_DATA(sResultatApresDecryptage, 24, sTextACrypter, 24);
+  result = aes_cipher(&obj, sTextACrypter, sTextCrypter, 192);
+  ASSERT_EQUAL(result, AES_OK);
+
+  result = aes_uncipher(&obj, sTextCrypter, sResultatApresDecryptage, 192);
+  ASSERT_EQUAL(result, AES_OK);
+
+  ASSERT_DATA(sTextACrypter, 24, sResultatApresDecryptage, 24);
 }
 
 CTEST(aes_test, test_aes_simple_256_txt_len)
@@ -44,14 +58,22 @@ CTEST(aes_test, test_aes_simple_256_txt_len)
   unsigned char sTextCrypter[33];
   unsigned char sResultatApresDecryptage[33];
   int result;
+  aes_obj obj;
 
-  result = aes_cipher(sTextACrypter, sTextCrypter, sClef, 256, 128);
+  result = aes_init(&obj);
   ASSERT_EQUAL(result, AES_OK);
 
-  result = aes_uncipher(sTextCrypter, sResultatApresDecryptage, sClef, 256, 128);
+  result = aes_generateKey(&obj, sClef, 128, 256);
   ASSERT_EQUAL(result, AES_OK);
 
-  ASSERT_DATA(sResultatApresDecryptage, 32, sTextACrypter, 32);
+  result = aes_cipher(&obj, sTextACrypter, sTextCrypter, 256);
+  ASSERT_EQUAL(result, AES_OK);
+
+  result = aes_uncipher(&obj, sTextCrypter, sResultatApresDecryptage, 256);
+  ASSERT_EQUAL(result, AES_OK);
+
+  ASSERT_DATA(sTextACrypter, 32, sResultatApresDecryptage, 32);
+
 }
 
 CTEST(aes_test, test_aes_simple_192_key_len)
@@ -61,14 +83,21 @@ CTEST(aes_test, test_aes_simple_192_key_len)
   unsigned char sTextCrypter[33];
   unsigned char sResultatApresDecryptage[33];
   int result;
+  aes_obj obj;
 
-  result = aes_cipher(sTextACrypter, sTextCrypter, sClef, 256, 192);
+  result = aes_init(&obj);
   ASSERT_EQUAL(result, AES_OK);
 
-  result = aes_uncipher(sTextCrypter, sResultatApresDecryptage, sClef, 256, 192);
+  result = aes_generateKey(&obj, sClef, 192, 256);
   ASSERT_EQUAL(result, AES_OK);
 
-  ASSERT_DATA(sResultatApresDecryptage, 32, sTextACrypter, 32);
+  result = aes_cipher(&obj, sTextACrypter, sTextCrypter, 256);
+  ASSERT_EQUAL(result, AES_OK);
+
+  result = aes_uncipher(&obj, sTextCrypter, sResultatApresDecryptage, 256);
+  ASSERT_EQUAL(result, AES_OK);
+
+  ASSERT_DATA(sTextACrypter, 32, sResultatApresDecryptage, 32);
 }
 
 
@@ -80,14 +109,21 @@ CTEST(aes_test, test_aes_simple_256_key_len)
   unsigned char sTextCrypter[33];
   unsigned char sResultatApresDecryptage[33];
   int result;
+  aes_obj obj;
 
-  result = aes_cipher(sTextACrypter, sTextCrypter, sClef, 256, 256);
+  result = aes_init(&obj);
   ASSERT_EQUAL(result, AES_OK);
 
-  result = aes_uncipher(sTextCrypter, sResultatApresDecryptage, sClef, 256, 256);
+  result = aes_generateKey(&obj, sClef, 256, 256);
   ASSERT_EQUAL(result, AES_OK);
 
-  ASSERT_DATA(sResultatApresDecryptage, 32, sTextACrypter, 32);
+  result = aes_cipher(&obj, sTextACrypter, sTextCrypter, 256);
+  ASSERT_EQUAL(result, AES_OK);
+
+  result = aes_uncipher(&obj, sTextCrypter, sResultatApresDecryptage, 256);
+  ASSERT_EQUAL(result, AES_OK);
+
+  ASSERT_DATA(sTextACrypter, 32, sResultatApresDecryptage, 32);
 }
 
 

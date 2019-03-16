@@ -7,32 +7,33 @@
 extern "C" {
 #endif /* __cplusplus */
 
-
-#define  aes_nMaxRound (14)
-#define  aes_nMaxNb    (8)
-
 typedef enum
 {
   AES_OK = 0,
   AES_FAILED = -1
 } AES_STATUS;
 
-typedef struct
+typedef enum
 {
-  cipher_context context;
-  int nSizeBlockInBits;
-  int Nk;
-  int Nb;
-  int Nr;
-  unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1];
-} aes_obj;
+  AES_KEY_LEN_128BITS,
+  AES_KEY_LEN_192BITS,
+  AES_KEY_LEN_256BITS
+} AES_KEY_LEN;
 
-extern AES_STATUS aes_init(aes_obj* aes);
-extern AES_STATUS aes_generateKey(aes_obj* aes, unsigned char pKey[], int nLenKeyInBits, int nLenBlockInBits);
-extern AES_STATUS aes_cipher(aes_obj* aes, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[],
-                             int nLongueurBlockInBits);
-extern AES_STATUS aes_uncipher(aes_obj* aes, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[],
-                               int nLongueurBlockInBits);
+typedef enum
+{
+  AES_BLOCK_LEN_128BITS,
+  AES_BLOCK_LEN_192BITS,
+  AES_BLOCK_LEN_256BITS,
+} AES_BLOCK_LEN;
+
+struct aes_obj;
+typedef struct aes_obj* AES;
+
+extern AES aes_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen);
+extern AES_STATUS aes_generateKey(AES aes, unsigned char pKey[]);
+extern AES_STATUS aes_cipher(AES aes, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[]);
+extern AES_STATUS aes_uncipher(AES aes, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[]);
 
 #ifdef __cplusplus
 }

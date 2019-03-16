@@ -1,9 +1,6 @@
 #include "aes.h"
 #include <assert.h>
 #include <stddef.h>
-/*
-static const int aes_nMaxRound = 14;
-static const int aes_nMaxNb = 8;*/
 
 static const unsigned char aes_byByteSubTransformation[256] =
 {
@@ -132,7 +129,7 @@ AES_STATUS aes_init(aes_obj* aes)
     return AES_FAILED;
   }
 
-  aes->context = 0;
+  aes->context = CIPHER_INITIALIZED;
 
   return AES_OK;
 }
@@ -214,7 +211,7 @@ AES_STATUS aes_generateKey(aes_obj* aes, unsigned char pKey[], int nLenKeyInBits
 
   aes_formatteKey(dwTabKey, aes->byTabKey, Nb, Nr);
 
-  aes->context = 1;
+  aes->context = CIPHER_KEY_GENERATED;
 
   return AES_OK;
 }
@@ -229,7 +226,7 @@ AES_STATUS aes_cipher(aes_obj* aes, unsigned char pTexteACrypter[], unsigned cha
 
   if (aes != NULL)
   {
-    if ((aes->context == 1) && (aes->nSizeBlockInBits == nLongueurBlockInBits))
+    if ((aes->context == CIPHER_KEY_GENERATED) && (aes->nSizeBlockInBits == nLongueurBlockInBits))
     {
       //we can continue now...
       aes_doCiphering(aes, pTexteACrypter, pTexteCrypter);
@@ -290,7 +287,7 @@ AES_STATUS aes_uncipher(aes_obj* aes, unsigned char pTexteCrypter[], unsigned ch
 
   if (aes != NULL)
   {
-    if ((aes->context == 1) && (aes->nSizeBlockInBits == nLongueurBlockInBits))
+    if ((aes->context == CIPHER_KEY_GENERATED) && (aes->nSizeBlockInBits == nLongueurBlockInBits))
     {
       //we can continue now...
       aes_doUnCiphering(aes, pTexteCrypter, pTexteDeCrypter);

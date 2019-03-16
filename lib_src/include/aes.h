@@ -1,13 +1,15 @@
 #ifndef AES_H
 #define AES_H
 
+#include "common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#define  aes_nMaxRound (14)
-#define aes_nMaxNb (8)
 
+#define  aes_nMaxRound (14)
+#define  aes_nMaxNb    (8)
 
 typedef enum
 {
@@ -17,7 +19,7 @@ typedef enum
 
 typedef struct
 {
-  int context;
+  cipher_context context;
   int nSizeBlockInBits;
   int Nk;
   int Nb;

@@ -32,8 +32,12 @@ typedef struct aes_obj* AES;
 
 extern AES aes_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen);
 extern AES_STATUS aes_generateKey(AES aes, unsigned char pKey[]);
-extern AES_STATUS aes_cipher(AES aes, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[]);
-extern AES_STATUS aes_uncipher(AES aes, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[]);
+extern AES_STATUS aes_cipher(AES aes, unsigned char plaintext[], unsigned char ciphertext[]);
+extern AES_STATUS aes_uncipher(AES aes, unsigned char ciphertext[], unsigned char plaintext[]);
+
+extern AES aes_stream_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen, cipher_mode mode);
+extern AES_STATUS aes_stream_cipher(AES aes, unsigned char plaintext, unsigned int len);
+extern AES_STATUS aes_stream_uncipher(AES aes, unsigned char plaintext, unsigned int len);
 
 #ifdef __cplusplus
 }

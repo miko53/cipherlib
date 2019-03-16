@@ -132,8 +132,8 @@ static void aes_calculExpansionKeySup6(unsigned char pClef[], unsigned long dwTa
 static unsigned long aes_rotByte(unsigned long dwValue);
 static unsigned long aes_subByte(unsigned long dwValue);
 
-static void aes_doCiphering(AES aes, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[]);
-static void aes_doUnCiphering(AES aes, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[]);
+static void aes_doCiphering(AES aes, unsigned char plaintext[], unsigned char ciphertext[]);
+static void aes_doUnCiphering(AES aes, unsigned char ciphertext[], unsigned char plaintext[]);
 
 
 AES aes_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen)
@@ -188,7 +188,7 @@ AES aes_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen)
 
   if (aes != NULL)
   {
-    //Calcul du nombre de rounds necc. pour les longeurs données
+    //calculate nb of necc. round according to data len
     if (aes->Nk > aes->Nb)
     {
       aes->Nr = aes->Nk;
@@ -250,7 +250,7 @@ AES_STATUS aes_generateKey(AES aes, unsigned char pKey[])
 
 
 
-AES_STATUS aes_cipher(AES aes, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[])
+AES_STATUS aes_cipher(AES aes, unsigned char plaintext[], unsigned char ciphertext[])
 {
   AES_STATUS status;
   status = AES_FAILED;
@@ -260,7 +260,7 @@ AES_STATUS aes_cipher(AES aes, unsigned char pTexteACrypter[], unsigned char pTe
     if (aes->context == CIPHER_KEY_GENERATED)
     {
       //we can continue now...
-      aes_doCiphering(aes, pTexteACrypter, pTexteCrypter);
+      aes_doCiphering(aes, plaintext, ciphertext);
       status = AES_OK;
     }
     else
@@ -272,14 +272,14 @@ AES_STATUS aes_cipher(AES aes, unsigned char pTexteACrypter[], unsigned char pTe
   return status;
 }
 
-static void aes_doCiphering(AES aes, unsigned char pTexteACrypter[], unsigned char pTexteCrypter[])
+static void aes_doCiphering(AES aes, unsigned char plaintext[], unsigned char ciphertext[])
 {
   unsigned char byTabBlock[4][aes_nMaxNb];
   int nCurrentRound = 0;
 
   assert(aes != NULL);
 
-  aes_formatteBlock(pTexteACrypter, byTabBlock, aes->Nb);
+  aes_formatteBlock(plaintext, byTabBlock, aes->Nb);
 
   //nCurrentRound = 0;
   aes_addRoundKey(byTabBlock, aes->Nb, aes->byTabKey, nCurrentRound);
@@ -305,12 +305,12 @@ static void aes_doCiphering(AES aes, unsigned char pTexteACrypter[], unsigned ch
   {
     for (j = 0; j < 4; j++)
     {
-      pTexteCrypter[4 * i + j ] = byTabBlock[j][i];
+      ciphertext[4 * i + j ] = byTabBlock[j][i];
     }
   }
 }
 
-AES_STATUS aes_uncipher(AES aes, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[])
+AES_STATUS aes_uncipher(AES aes, unsigned char ciphertext[], unsigned char plaintext[])
 {
   AES_STATUS status;
   status = AES_FAILED;
@@ -320,7 +320,7 @@ AES_STATUS aes_uncipher(AES aes, unsigned char pTexteCrypter[], unsigned char pT
     if (aes->context == CIPHER_KEY_GENERATED)
     {
       //we can continue now...
-      aes_doUnCiphering(aes, pTexteCrypter, pTexteDeCrypter);
+      aes_doUnCiphering(aes, ciphertext, plaintext);
       status = AES_OK;
     }
     else
@@ -332,13 +332,13 @@ AES_STATUS aes_uncipher(AES aes, unsigned char pTexteCrypter[], unsigned char pT
   return status;
 }
 
-static void aes_doUnCiphering(AES aes, unsigned char pTexteCrypter[], unsigned char pTexteDeCrypter[])
+static void aes_doUnCiphering(AES aes, unsigned char ciphertext[], unsigned char plaintext[])
 {
   assert(aes != NULL);
   unsigned char byTabBlock[4][aes_nMaxNb];
   int nCurrentRound = 0;
 
-  aes_formatteBlock(pTexteCrypter, byTabBlock, aes->Nb);
+  aes_formatteBlock(ciphertext, byTabBlock, aes->Nb);
 
   nCurrentRound = aes->Nr;
   aes_addRoundKey(byTabBlock, aes->Nb, aes->byTabKey, nCurrentRound);
@@ -364,7 +364,7 @@ static void aes_doUnCiphering(AES aes, unsigned char pTexteCrypter[], unsigned c
   {
     for (j = 0; j < 4; j++)
     {
-      pTexteDeCrypter[4 * i + j ] = byTabBlock[j][i];
+      plaintext[4 * i + j ] = byTabBlock[j][i];
     }
   }
 }

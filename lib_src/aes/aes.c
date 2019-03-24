@@ -2,19 +2,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
-
-#define  aes_nMaxRound (14)
-#define  aes_nMaxNb    (8)
-
-struct aes_obj
-{
-  cipher_context context;
-  int Nk;
-  int Nb;
-  int Nr;
-  unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1];
-} ;
-
+#include "aes_loc.h"
 
 static const unsigned char aes_byByteSubTransformation[256] =
 {
@@ -105,25 +93,27 @@ static const unsigned long aes_dwRoundCnst[30] =
 };
 
 
-static void aes_mixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
-static void aes_invMixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
+static void aes_mixColumn(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb);
+static void aes_invMixColumn(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb);
 
 static unsigned char aes_multiplicationGF2Poly(unsigned char a, unsigned char b);
-static void aes_shiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
-static void aes_invShiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
+static void aes_shiftRow(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb);
+static void aes_invShiftRow(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb);
 
-static void aes_rotationLignes(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb, int nNoLigne, int NbRotation);
-static void aes_rotationLignesDroite(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb, int nNoLigne, int NbRotation);
+static void aes_rotationLignes(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb, int nNoLigne, int NbRotation);
+static void aes_rotationLignesDroite(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb, int nNoLigne,
+                                     int NbRotation);
 
-static void aes_invByteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
-static void aes_byteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
+static void aes_invByteSub(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb);
+static void aes_byteSub(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb);
 
-static void aes_formatteBlock(unsigned char byBlock[], unsigned char byArrayBlock[4][aes_nMaxNb], int nNb);
-static void aes_formatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1], int nNb,
+static void aes_formatteBlock(unsigned char byBlock[], unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb);
+static void aes_formatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][AES_N_MAX_NB][AES_N_MAX_ROUND + 1],
+                            int nNb,
                             int nNr);
 
-static void aes_addRoundKey(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb,
-                            unsigned char byBlockKey[4][aes_nMaxNb][aes_nMaxRound + 1],
+static void aes_addRoundKey(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb,
+                            unsigned char byBlockKey[4][AES_N_MAX_NB][AES_N_MAX_ROUND + 1],
                             int nRound);
 
 static void aes_calculExpansionKeyInf6(unsigned char pClef[], unsigned long dwTabKey[], int nNk, int nNb, int nNr);
@@ -222,9 +212,18 @@ AES aes_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen)
 }
 
 
+void aes_destroy(AES aes)
+{
+  if (aes != NULL)
+  {
+    free(aes);
+  }
+}
+
+
 AES_STATUS aes_generateKey(AES aes, unsigned char pKey[])
 {
-  unsigned long dwTabKey[aes_nMaxNb * (aes_nMaxRound + 1)];
+  unsigned long dwTabKey[AES_N_MAX_NB * (AES_N_MAX_ROUND + 1)];
 
   if (aes == NULL)
   {
@@ -274,7 +273,7 @@ AES_STATUS aes_cipher(AES aes, unsigned char plaintext[], unsigned char cipherte
 
 static void aes_doCiphering(AES aes, unsigned char plaintext[], unsigned char ciphertext[])
 {
-  unsigned char byTabBlock[4][aes_nMaxNb];
+  unsigned char byTabBlock[4][AES_N_MAX_NB];
   int nCurrentRound = 0;
 
   assert(aes != NULL);
@@ -335,7 +334,7 @@ AES_STATUS aes_uncipher(AES aes, unsigned char ciphertext[], unsigned char plain
 static void aes_doUnCiphering(AES aes, unsigned char ciphertext[], unsigned char plaintext[])
 {
   assert(aes != NULL);
-  unsigned char byTabBlock[4][aes_nMaxNb];
+  unsigned char byTabBlock[4][AES_N_MAX_NB];
   int nCurrentRound = 0;
 
   aes_formatteBlock(ciphertext, byTabBlock, aes->Nb);
@@ -369,7 +368,7 @@ static void aes_doUnCiphering(AES aes, unsigned char ciphertext[], unsigned char
   }
 }
 
-static void aes_invShiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
+static void aes_invShiftRow(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb)
 {
   if ((nNb == 4) || (nNb == 6))
   {
@@ -385,7 +384,7 @@ static void aes_invShiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
   }
 }
 
-static void aes_rotationLignesDroite(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb, int nNoLigne, int NbRotation)
+static void aes_rotationLignesDroite(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb, int nNoLigne, int NbRotation)
 {
   int i;
   int j;
@@ -404,9 +403,9 @@ static void aes_rotationLignesDroite(unsigned char byArrayBlock[4][aes_nMaxNb], 
   }
 }
 
-static void aes_invMixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
+static void aes_invMixColumn(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb)
 {
-  unsigned char byTempArray[4][aes_nMaxNb];
+  unsigned char byTempArray[4][AES_N_MAX_NB];
   int i;
   int j;
 
@@ -442,9 +441,9 @@ static void aes_invMixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
   }
 }
 
-static void aes_mixColumn(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
+static void aes_mixColumn(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb)
 {
-  unsigned char byTempArray[4][aes_nMaxNb];
+  unsigned char byTempArray[4][AES_N_MAX_NB];
   int i;
   int j;
 
@@ -492,7 +491,7 @@ unsigned char aes_multiplicationGF2Poly(unsigned char a, unsigned char b)
   }
 }
 
-static void aes_shiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
+static void aes_shiftRow(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb)
 {
   if ((nNb == 4) || (nNb == 6))
   {
@@ -508,7 +507,7 @@ static void aes_shiftRow(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
   }
 }
 
-static void aes_rotationLignes(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb, int nNoLigne, int NbRotation)
+static void aes_rotationLignes(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb, int nNoLigne, int NbRotation)
 {
   int i;
   int j;
@@ -527,7 +526,7 @@ static void aes_rotationLignes(unsigned char byArrayBlock[4][aes_nMaxNb], int nN
   }
 }
 
-static void aes_invByteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
+static void aes_invByteSub(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb)
 {
   int i;
   int j;
@@ -542,7 +541,7 @@ static void aes_invByteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 }
 
 
-static void aes_byteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
+static void aes_byteSub(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb)
 {
   int i;
   int j;
@@ -557,8 +556,8 @@ static void aes_byteSub(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
 }
 
 
-static void aes_addRoundKey(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb,
-                            unsigned char byBlockKey[4][aes_nMaxNb][aes_nMaxRound + 1],
+static void aes_addRoundKey(unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb,
+                            unsigned char byBlockKey[4][AES_N_MAX_NB][AES_N_MAX_ROUND + 1],
                             int nRound)
 {
   int i;
@@ -574,7 +573,7 @@ static void aes_addRoundKey(unsigned char byArrayBlock[4][aes_nMaxNb], int nNb,
 }
 
 
-static void aes_formatteBlock(unsigned char byBlock[], unsigned char byArrayBlock[4][aes_nMaxNb], int nNb)
+static void aes_formatteBlock(unsigned char byBlock[], unsigned char byArrayBlock[4][AES_N_MAX_NB], int nNb)
 {
   int j;
 
@@ -588,7 +587,8 @@ static void aes_formatteBlock(unsigned char byBlock[], unsigned char byArrayBloc
 }
 
 
-static void aes_formatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][aes_nMaxNb][aes_nMaxRound + 1], int nNb,
+static void aes_formatteKey(unsigned long dwTabKey[], unsigned char byTabKey[4][AES_N_MAX_NB][AES_N_MAX_ROUND + 1],
+                            int nNb,
                             int nNr)
 {
   int i;

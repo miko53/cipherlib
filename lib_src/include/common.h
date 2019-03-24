@@ -7,7 +7,7 @@ typedef enum { FALSE, TRUE} BOOL;
 
 typedef enum
 {
-  CIPHER_MODE_ECB,
+  CIPHER_MODE_ECB, /* Electronic Code Book mode */
   CIPHER_MODE_CBC
 } cipher_mode;
 

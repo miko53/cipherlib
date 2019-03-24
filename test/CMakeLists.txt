@@ -13,5 +13,9 @@ target_link_libraries(des_tests cipher)
 add_executable(aes_tests aes_tst_main.c)
 target_link_libraries(aes_tests cipher)
 
+add_executable(aes_tst_block_ecb_main aes_tst_block_ecb_main.c)
+target_link_libraries(aes_tst_block_ecb_main cipher)
+
 add_test(test_des des_tests)
 add_test(test_aes aes_tests)
+add_test(test_aes aes_tst_block_ecb_main)

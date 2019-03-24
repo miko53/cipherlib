@@ -34,10 +34,13 @@ extern AES aes_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen);
 extern AES_STATUS aes_generateKey(AES aes, unsigned char pKey[]);
 extern AES_STATUS aes_cipher(AES aes, unsigned char plaintext[], unsigned char ciphertext[]);
 extern AES_STATUS aes_uncipher(AES aes, unsigned char ciphertext[], unsigned char plaintext[]);
+extern void aes_destroy(AES aes);
 
-extern AES aes_stream_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen, cipher_mode mode);
-extern AES_STATUS aes_stream_cipher(AES aes, unsigned char plaintext, unsigned int len);
-extern AES_STATUS aes_stream_uncipher(AES aes, unsigned char plaintext, unsigned int len);
+extern AES aes_block_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen, cipher_mode mode);
+extern AES_STATUS aes_block_cipher(AES aes, unsigned char plaintext[], unsigned int len, unsigned char key[],
+                                   unsigned char** pCipherText, unsigned int* lenCipherText);
+extern AES_STATUS aes_block_uncipher(AES aes, unsigned char ciphertext[], unsigned int len, unsigned char key[],
+                                     unsigned char** pPlainText, unsigned int* lenPlainText);
 
 #ifdef __cplusplus
 }

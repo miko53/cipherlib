@@ -25,6 +25,8 @@ CTEST(aes_test, test_aes_simple)
   ASSERT_EQUAL(result, AES_OK);
 
   ASSERT_DATA(sTextACrypter, 16, sResultatApresDecryptage, 16);
+
+  aes_destroy(obj);
 }
 
 CTEST(aes_test, test_aes_simple_192_txt_len)
@@ -49,6 +51,8 @@ CTEST(aes_test, test_aes_simple_192_txt_len)
   ASSERT_EQUAL(result, AES_OK);
 
   ASSERT_DATA(sTextACrypter, 24, sResultatApresDecryptage, 24);
+
+  aes_destroy(obj);
 }
 
 CTEST(aes_test, test_aes_simple_256_txt_len)
@@ -74,6 +78,7 @@ CTEST(aes_test, test_aes_simple_256_txt_len)
 
   ASSERT_DATA(sTextACrypter, 32, sResultatApresDecryptage, 32);
 
+  aes_destroy(obj);
 }
 
 CTEST(aes_test, test_aes_simple_192_key_len)
@@ -98,6 +103,8 @@ CTEST(aes_test, test_aes_simple_192_key_len)
   ASSERT_EQUAL(result, AES_OK);
 
   ASSERT_DATA(sTextACrypter, 32, sResultatApresDecryptage, 32);
+
+  aes_destroy(obj);
 }
 
 
@@ -124,6 +131,8 @@ CTEST(aes_test, test_aes_simple_256_key_len)
   ASSERT_EQUAL(result, AES_OK);
 
   ASSERT_DATA(sTextACrypter, 32, sResultatApresDecryptage, 32);
+
+  aes_destroy(obj);
 }
 
 

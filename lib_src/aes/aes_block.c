@@ -141,7 +141,6 @@ AES_STATUS aes_block_cipher(AES aes, unsigned char plaintext[], unsigned int len
 
       case CIPHER_MODE_CBC:
         status = aes_block_doCipherInCBCMode(aes, plaintext, len, key, pCipherText, lenCipherText);
-
         break;
 
       default:
@@ -310,15 +309,6 @@ static AES_STATUS aes_block_doCipherInCBCMode(AES aes, unsigned char plaintext[]
 
         status = aes_cipher(aes, xoredBlock, *pCipherText + nbBlock * blockSizeInBytes);
       }
-      else
-      {
-        /*
-         for (int i = 0; i < blockSizeInBytes; i++)
-         {
-           xoredBlock[i] = plaintext[blockSizeInBytes * (nbBlock - 1) + i] ^ (*pCipherText)[blockSizeInBytes * (nbBlock - 1) + i];
-         }
-         status = aes_cipher(aes, xoredBlock, *pCipherText + blockSizeInBytes * (nbBlock));*/
-      }
     }
     else
     {
@@ -384,6 +374,7 @@ static AES_STATUS aes_block_doUnCipherInECBMode(AES aes, unsigned char ciphertex
   {
     nbMaxBlock++;
     assert(FALSE); //normally not possible always of blockSizeInBytes len
+    return AES_FAILED;
   }
 
   //allocate area
@@ -409,26 +400,11 @@ static AES_STATUS aes_block_doUnCipherInECBMode(AES aes, unsigned char ciphertex
     nbBock = 0;
 
 
-    while ((nbBock < (nbMaxBlock - 1)) && (status == AES_OK))
+    while ((nbBock < (nbMaxBlock)) && (status == AES_OK))
     {
       status = aes_uncipher(aes, ciphertext + nbBock * blockSizeInBytes, *pPlainText + nbBock * blockSizeInBytes);
       nbBock++;
     }
-
-    //last block
-    //nbBock++;
-    if (padding != 0)
-    {
-      unsigned char lastBlock[blockSizeInBytes];
-      memcpy(lastBlock, ciphertext + nbBock * blockSizeInBytes, padding);
-      memset(lastBlock + padding, 0, blockSizeInBytes - padding);
-      status = aes_uncipher(aes, lastBlock, *pPlainText + nbBock * blockSizeInBytes);
-    }
-    else
-    {
-      status = aes_uncipher(aes, ciphertext + nbBock * blockSizeInBytes, *pPlainText + nbBock * blockSizeInBytes);
-    }
-
   }
 
   if ((status != AES_OK) && (*pPlainText != NULL))
@@ -457,6 +433,7 @@ static AES_STATUS aes_block_doUnCipherInCBCMode(AES aes, unsigned char ciphertex
   if (padding != 0)
   {
     assert(FALSE); // not possible
+    return AES_FAILED;
   }
 
   //remove the dummy block
@@ -502,31 +479,11 @@ static AES_STATUS aes_block_doUnCipherInCBCMode(AES aes, unsigned char ciphertex
       }
       nbBlock++;
     }
-
-    //last block
-    if (padding != 0)
-    {
-      //       unsigned char lastBlock[blockSizeInBytes];
-      //       memcpy(lastBlock, plaintext + nbBlock * blockSizeInBytes, padding);
-      //       memset(lastBlock + padding, 0, blockSizeInBytes - padding);
-      //
-      //       for (int i = 0; i < blockSizeInBytes; i++)
-      //       {
-      //         xoredBlock[i] = lastBlock[i] ^ (*pCipherText)[blockSizeInBytes * (nbBlock - 1) + i];
-      //       }
-      //
-      //       status = aes_cipher(aes, lastBlock, *pCipherText + nbBlock * blockSizeInBytes);
-    }
-    else
-    {
-      ;
-    }
   }
   else
   {
     status = AES_FAILED;
   }
-
 
   if ((status != AES_OK) && (*pPlainText != NULL))
   {

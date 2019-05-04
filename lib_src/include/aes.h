@@ -37,6 +37,10 @@ extern AES_STATUS aes_uncipher(AES aes, unsigned char ciphertext[], unsigned cha
 extern void aes_destroy(AES aes);
 
 extern AES aes_block_init(AES_KEY_LEN keylen, AES_BLOCK_LEN blocklen, cipher_mode mode);
+extern AES_STATUS aes_block_setInitializationVector(AES aes, char IV[32]);
+extern AES_STATUS aes_block_getInitializationVector(AES aes, char IV[32]);
+extern AES_STATUS aes_block_generateInitializationVector(AES aes);
+
 extern AES_STATUS aes_block_cipher(AES aes, unsigned char plaintext[], unsigned int len, unsigned char key[],
                                    unsigned char** pCipherText, unsigned int* lenCipherText);
 extern AES_STATUS aes_block_uncipher(AES aes, unsigned char ciphertext[], unsigned int len, unsigned char key[],

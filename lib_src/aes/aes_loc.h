@@ -15,6 +15,7 @@ struct aes_obj
 {
   cipher_context context;
   cipher_mode mode;
+  unsigned char IV[32]; //max block size if 256bits
   int Nk;
   int Nb;
   int Nr;

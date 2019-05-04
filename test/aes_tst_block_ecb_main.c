@@ -27,7 +27,7 @@ CTEST(aes_block_ecb, aes_one_block)
 
   AES aesUnCipher = NULL;
   aesUnCipher = aes_block_init(AES_KEY_LEN_128BITS, AES_BLOCK_LEN_128BITS, CIPHER_MODE_ECB);
-  ASSERT_NOT_NULL(aes);
+  ASSERT_NOT_NULL(aesUnCipher);
 
   status = aes_block_uncipher(aesUnCipher, pCipherText, 16, sKey, &pPlainText, &lenPlainText);
   ASSERT_EQUAL(status, AES_OK);

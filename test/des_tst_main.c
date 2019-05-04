@@ -174,9 +174,6 @@ CTEST(des3_test, test_triple_des_simple_wrong_key_len)
 
   status = des3_uncipher(&obj, cryptResult, uncryptResult, 64);
   ASSERT_EQUAL(status, DES_INIT_FAILED);
-
-  //data shall be the same after deciphering
-  ASSERT_DATA(uncryptResult, 8, toCrypt, 8);
 }
 
 

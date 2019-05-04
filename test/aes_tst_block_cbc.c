@@ -110,6 +110,43 @@ CTEST(aes_block_cbc, aes_more_block)
   aes_destroy(aesUnCipher);
 }
 
+CTEST(aes_block_cbc, aes_more_block_incomplete)
+{
+  AES_STATUS status;
+  unsigned char sTextACrypter[] = "ClaudiusCaligulaClaudiusCaligulaClaudiusCaligulaClaudiusCaligulaClaudiusCaligulaABF";
+  unsigned char sKey[]         = "123456789ABCDEF0";
+  unsigned char* pCipherText;
+  unsigned int lenCipherText;
+  unsigned char* pPlainText;
+  unsigned int lenPlainText;
+
+  AES aes = NULL;
+
+  aes = aes_block_init(AES_KEY_LEN_128BITS, AES_BLOCK_LEN_128BITS, CIPHER_MODE_CBC);
+  ASSERT_NOT_NULL(aes);
+
+  status = aes_block_cipher(aes, sTextACrypter, strlen((char*) sTextACrypter), sKey, &pCipherText, &lenCipherText);
+  ASSERT_EQUAL(status, AES_OK);
+  ASSERT_NOT_NULL(pCipherText);
+  ASSERT_EQUAL(lenCipherText, 6 * 16 + 16); //plus one block the dummy block
+
+  AES aesUnCipher = NULL;
+  aesUnCipher = aes_block_init(AES_KEY_LEN_128BITS, AES_BLOCK_LEN_128BITS, CIPHER_MODE_CBC);
+  ASSERT_NOT_NULL(aes);
+
+  status = aes_block_uncipher(aesUnCipher, pCipherText, lenCipherText, sKey, &pPlainText, &lenPlainText);
+  ASSERT_EQUAL(status, AES_OK);
+  ASSERT_NOT_NULL(pPlainText);
+  ASSERT_EQUAL(lenPlainText, 6 * 16);
+  ASSERT_DATA(sTextACrypter,  strlen((char*) sTextACrypter), pPlainText, strlen((char*) sTextACrypter));
+
+  free(pPlainText);
+  free(pCipherText);
+
+  aes_destroy(aes);
+  aes_destroy(aesUnCipher);
+}
+
 
 int main(int argc, const char* argv[])
 {

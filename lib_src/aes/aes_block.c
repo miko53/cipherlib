@@ -298,8 +298,9 @@ static AES_STATUS aes_block_doCipherInCBCMode(AES aes, unsigned char plaintext[]
       //last block
       if (padding != 0)
       {
+        nbBlock--;
         unsigned char lastBlock[blockSizeInBytes];
-        memcpy(lastBlock, plaintext + nbBlock * blockSizeInBytes, padding);
+        memcpy(lastBlock, &plaintext [ (nbBlock - 1) * blockSizeInBytes], padding);
         memset(lastBlock + padding, 0, blockSizeInBytes - padding);
 
         for (int i = 0; i < blockSizeInBytes; i++)
@@ -307,7 +308,7 @@ static AES_STATUS aes_block_doCipherInCBCMode(AES aes, unsigned char plaintext[]
           xoredBlock[i] = lastBlock[i] ^ (*pCipherText)[blockSizeInBytes * (nbBlock - 1) + i];
         }
 
-        status = aes_cipher(aes, lastBlock, *pCipherText + nbBlock * blockSizeInBytes);
+        status = aes_cipher(aes, xoredBlock, *pCipherText + nbBlock * blockSizeInBytes);
       }
       else
       {
